@@ -1,7 +1,7 @@
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
 /* WebGL context */
-var GL = CANVAS.getContext("webgl");
+var GL = CANVAS.getContext("webgl", { antialias: false });
 document.body.appendChild(CANVAS);
 /**
  * Resizes the context
