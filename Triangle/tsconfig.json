@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "charset": "utf-8",
+        "listFiles": true,
+        "locale": "en-us",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "outDir": "Scripts/JS",
+        "removeComments": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "target": "es3"
+    },
+    "files": [
+        "Scripts/TS/triangle.ts"
+    ]
+}
