@@ -2,7 +2,7 @@
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl");
+const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false});
 
 document.body.appendChild(CANVAS);
 
