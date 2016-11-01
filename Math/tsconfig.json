@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "charset": "utf-8",
+        "listFiles": true,
+        "locale": "en-us",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "outFile": "Math.js",
+        "removeComments": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "target": "es3"
+    },
+    "files": [
+        "Vec2.ts",
+        "Vec3.ts",
+        "Vec4.ts",
+        "Mat2.ts",
+        "mat3.ts",
+        "Mat4.ts"
+    ]
+}
