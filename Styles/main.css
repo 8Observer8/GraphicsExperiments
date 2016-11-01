@@ -1,0 +1,39 @@
+html 
+{
+    background-color: #424242;
+}
+
+#head-content
+{
+    font-family: 'Roboto', sans-serif;
+    font-size: 14pt;
+
+    position: absolute;
+    height: 5%;
+    width: 100%;
+    color: whitesmoke;
+    text-indent: 2.5%;
+    margin-top: 1%;
+}
+
+#editor 
+{ 
+    position: absolute;
+    
+    left: 0;
+    top: 5%;
+
+    width: 50%;
+    height: 95%;
+}
+
+#demoFrame
+{
+    position: absolute;
+
+    right: 0;
+    top: 5%;
+
+    width: 50%;
+    height: 95%;
+}
