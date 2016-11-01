@@ -4,4 +4,4 @@
 
 ### **Demos**
 
-* Test 1: [Default Editor](https://github.com/omarhuseynov011/GraphicsExperiments/blob/gh-pages/Default/index.html)
+* Test 1: [Default Editor](https://omarhuseynov011.github.io/GraphicsExperiments/Default/)
