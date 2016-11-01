@@ -53,10 +53,12 @@ function Main() {
         var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
         GL.enableVertexAttribArray(VertexPosition);
         GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
+        GL.bindBuffer(GL.ARRAY_BUFFER, null);
         GL.clearColor(0.5, 0.5, 1.0, 1.0);
         GL.viewport(0, 0, CANVAS.width, CANVAS.height);
         GL.clear(GL.COLOR_BUFFER_BIT);
-        GL.drawArrays(GL.TRIANGLES, 0, 3);
+        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+        GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
     }
 }
 Main();
