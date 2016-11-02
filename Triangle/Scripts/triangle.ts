@@ -1,4 +1,19 @@
+/* Source of vertex shader */
+const VertexShaderSource: string = "#version 100\n" +
+                                   "attribute mediump vec2 aPosition;\n" +
+                                   "void main(void){\n" +
+                                   "gl_Position = vec4(aPosition, 1, 1);\n" +
+                                   "}\n";
+
+/* Source of fragment shader */
+const FragmentShaderSource: string = "#version 100\n" +
+                                     "precision mediump float;\n" +
+                                     "void main(void){\n" +
+                                     "gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);\n" +
+                                     "}";
+
 declare let CompileShaders: any;
+declare let GenTriangle: any;
 
 /* Canvas element */
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
@@ -41,19 +56,9 @@ function Init()
 
         CANVAS.height = window.innerHeight;
 
-        const VertexShaderSource: string = `#version 100
-            attribute mediump vec2 aPosition;
-            void main(void){gl_Position = vec4(aPosition, 1, 1);}`;
-
-        const FragmentShaderSource: string = `#version 100
-            precision mediump float;
-            void main(void){gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);}`;
-
         let ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
-        const Vertices: Float32Array = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
-
-        const Indices: Uint16Array | null = new Uint16Array([0, 1, 2]);
+        const Triangle: any = GenTriangle();
 
         let VertexBuffer: WebGLBuffer | null = GL.createBuffer();
 
@@ -61,13 +66,13 @@ function Init()
 
         GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.bufferData(GL.ARRAY_BUFFER, Vertices, GL.STATIC_DRAW);
+            GL.bufferData(GL.ARRAY_BUFFER, Triangle.Vertices, GL.STATIC_DRAW);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
-            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Indices, GL.STATIC_DRAW);
+            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Triangle.Indices, GL.STATIC_DRAW);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
@@ -79,7 +84,7 @@ function Init()
 
         GL.enableVertexAttribArray(VertexPosition);
 
-        GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
+        GL.vertexAttribPointer(VertexPosition, Triangle.VertexSize, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
@@ -91,7 +96,7 @@ function Init()
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
-        GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
+        GL.drawElements(GL.TRIANGLES, Triangle.NumOfIndices, GL.UNSIGNED_SHORT, 0);
     }
 }
 

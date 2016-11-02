@@ -18,6 +18,7 @@
         "module": "none"
     },
     "files": [
-        "Scripts/shaders.ts"
+        "Scripts/shaders.ts",
+        "Scripts/mesh.ts"
     ]
 }

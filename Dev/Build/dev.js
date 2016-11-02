@@ -25,3 +25,18 @@ function CompileShaders(GL, VertexShaderSource, FragmentShaderSource) {
     GL.deleteShader(FragmentShader);
     return ShaderProgram;
 }
+var Mesh = (function () {
+    function Mesh(Vertices, Indices, VertexSize, NumOfIndices) {
+        this.Vertices = Vertices;
+        this.Indices = Indices;
+        this.VertexSize = VertexSize;
+        this.NumOfIndices = NumOfIndices;
+    }
+    return Mesh;
+}());
+function GenTriangle() {
+    var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
+    var Indices = new Uint16Array([0, 1, 2]);
+    var TriangleMesh = new Mesh(Vertices, Indices, 2, 3);
+    return TriangleMesh;
+}

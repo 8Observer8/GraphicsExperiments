@@ -9,13 +9,15 @@ var Editor = (function () {
         Editor.ReloadFrame(Editor.FrameContent, Editor.AceEditor);
     };
     Editor.ReloadFrame = function (FrameContent, AceEditor) {
-        if (this.bClearConsole) {
+        if (Editor.bClearConsole) {
             console.clear();
         }
         FrameContent.open();
-        FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/><body></body><script src='../Math/Build/Math.min.js'></script><script src='../Dev/Build/dev.js'></script><script>"
-            + AceEditor.getValue() +
-            "</script>");
+        FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/>");
+        FrameContent.write("<body></body>");
+        FrameContent.write("<script src='../Math/Build/Math.min.js'></script>");
+        FrameContent.write("<script src='../Dev/Build/dev.js'></script>");
+        FrameContent.write("<script>" + AceEditor.getValue() + "</script>");
         FrameContent.close();
     };
     Editor.prototype.InitEditor = function () {
