@@ -1,3 +1,6 @@
+declare let CompileShaders: any;
+declare let GenTriangle: any;
+
 /* Source of vertex shader */
 const VertexShaderSource: string = "#version 100\n" +
                                    "attribute mediump vec2 aPosition;\n" +
@@ -10,10 +13,7 @@ const FragmentShaderSource: string = "#version 100\n" +
                                      "precision mediump float;\n" +
                                      "void main(void){\n" +
                                      "gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);\n" +
-                                     "}";
-
-declare let CompileShaders: any;
-declare let GenTriangle: any;
+                                     "}\n";
 
 /* Canvas element */
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");

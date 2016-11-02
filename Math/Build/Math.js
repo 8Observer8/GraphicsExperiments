@@ -1332,5 +1332,121 @@ var Mat4 = (function () {
         MatToTranspose[13] = M13;
         MatToTranspose[14] = M23;
     };
+    /**
+     * Creates 4X4 camera view matrix
+     *
+     * @param OutMat {Float32Array}: result matrix
+     * @param EyePosition {Float32Array}: position of the camera
+     * @param LookAt {Float32Array}: location the camera is looking at
+     * @param UpVector {Float32Array}: vector pointing up
+     * @returns {void}
+     */
+    Mat4.CreateViewMat = function (OutMat, EyePosition, LookAt, UpVector) {
+        var Z0 = EyePosition[0] - LookAt[0];
+        var Z1 = EyePosition[1] - LookAt[1];
+        var Z2 = EyePosition[2] - LookAt[2];
+        var Length = Z0 * Z0 + Z1 * Z1 + Z2 * Z2;
+        if (Length === 0) {
+            Z0 = 0;
+            Z1 = 0;
+            Z2 = 0;
+        }
+        else {
+            Length = 1.0 / Math.sqrt(Length);
+            Z0 *= Length;
+            Z1 *= Length;
+            Z2 *= Length;
+        }
+        var X0 = UpVector[1] * Z2 - UpVector[2] * Z1;
+        var X1 = UpVector[2] * Z0 - UpVector[0] * Z2;
+        var X2 = UpVector[0] * Z1 - UpVector[1] * Z0;
+        Length = X0 * X0 + X1 * X1 + X2 * X2;
+        if (Length === 0) {
+            X0 = 0;
+            X1 = 0;
+            X2 = 0;
+        }
+        else {
+            Length = 1.0 / Math.sqrt(Length);
+            X0 *= Length;
+            X1 *= Length;
+            X2 *= Length;
+        }
+        var Y0 = Z1 * X2 - Z2 * X1;
+        var Y1 = Z2 * X0 - Z0 * X2;
+        var Y2 = Z0 * X1 - Z1 * X0;
+        Length = Y0 * Y0 + Y1 * Y1 + Y2 * Y2;
+        if (Length === 0) {
+            Y0 = 0;
+            Y1 = 0;
+            Y2 = 0;
+        }
+        else {
+            Length = 1.0 / Math.sqrt(Length);
+            Y0 *= Length;
+            Y1 *= Length;
+            Y2 *= Length;
+        }
+        OutMat[0] = X0;
+        OutMat[1] = Y0;
+        OutMat[2] = Z0;
+        // OutMat[3] = 0;
+        OutMat[4] = X1;
+        OutMat[5] = Y1;
+        OutMat[6] = Z1;
+        // OutMat[7] = 0;
+        OutMat[8] = X2;
+        OutMat[9] = Y2;
+        OutMat[10] = Z2;
+        // OutMat[11] = 0;
+        OutMat[12] = -(X0 * EyePosition[0] + X1 * EyePosition[1] + X2 * EyePosition[2]);
+        OutMat[13] = -(Y0 * EyePosition[0] + Y1 * EyePosition[1] + Y2 * EyePosition[2]);
+        OutMat[14] = -(Z0 * EyePosition[0] + Z1 * EyePosition[1] + Z2 * EyePosition[2]);
+        // OutMat[15] = 1.0;
+    };
+    /**
+     * Creates 4X4 matrix for orthographic projection
+     *
+     * @param OutMat {Float32Array}: result matrix
+     * @param Left {number}: left border of frustum
+     * @param Right {number}: right border of frustum
+     * @param Top {number}: top border of frustum
+     * @param Bottom {number}: bottom border of frustum
+     * @param Near {number}: near border of frustum
+     * @param Far {number}: far border of frustum
+     * @returns {void}
+     */
+    Mat4.CreateOrthographicProjectionMat = function (OutMat, Left, Right, Top, Bottom, Near, Far) {
+        var LR = 1.0 / (Left - Right);
+        var BT = 1.0 / (Bottom - Top);
+        var NF = 1.0 / (Near - Far);
+        OutMat[0] = -2.0 * LR;
+        OutMat[5] = -2.0 * BT;
+        OutMat[10] = 2.0 * NF;
+        OutMat[12] = (Left + Right) * LR;
+        OutMat[13] = (Top + Bottom) * BT;
+        OutMat[14] = (Near + Far) * NF;
+        // OutMat[15] = 1.0;
+    };
+    /**
+     * Creates 4X4 matrix for perspective projection
+     *
+     * @param OutMat {Float32Array}: result matrix
+     * @param AspectRatio {number}: aspect ratio of the viewport
+     * @param FOV {number}: vertical field of view
+     * @param Near {number}: near border of the frustum
+     * @param Far {number}: far border of the frustum
+     * @returns {void}
+     */
+    Mat4.CreatePerspectiveProjectionMat = function (OutMat, AspectRatio, FOV, Near, Far) {
+        var F = 1.0 / Math.tan(FOV / 2.0);
+        var NF = 1.0 / (Near - Far);
+        OutMat[0] = F / AspectRatio;
+        OutMat[5] = F;
+        OutMat[10] = (Far + Near) * NF;
+        OutMat[11] = -1.0;
+        OutMat[14] = 2.0 * Far * Near * NF;
+        OutMat[15] = 0;
+    };
     return Mat4;
 }());

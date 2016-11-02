@@ -37,6 +37,12 @@ var Mesh = (function () {
 function GenTriangle() {
     var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
     var Indices = new Uint16Array([0, 1, 2]);
-    var TriangleMesh = new Mesh(Vertices, Indices, 2, 3);
+    var TriangleMesh = new Mesh(Vertices, Indices, 2, Indices.length);
     return TriangleMesh;
+}
+function GenQuad() {
+    var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]);
+    var Indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
+    var QuadMesh = new Mesh(Vertices, Indices, 2, Indices.length);
+    return QuadMesh;
 }
