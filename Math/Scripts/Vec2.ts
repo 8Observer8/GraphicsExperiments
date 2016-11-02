@@ -35,6 +35,18 @@ abstract class Vec2
     }
 
     /**
+     * Creates a new vector from given values
+     * 
+     * @param X {number}: x value 
+     * @param Y {number}: y value 
+     * @returns {Float32Array}
+     */
+    public static FromValues(X: number, Y: number): Float32Array
+    {
+        return new Float32Array([X, Y]);
+    }
+
+    /**
      * Adds two given vectors 
      * 
      * @param OutVec {Float32Array}: result vector 

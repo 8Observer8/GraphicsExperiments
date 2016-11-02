@@ -19,15 +19,16 @@ window.addEventListener("resize", Resize);
  *
  * @returns void
  */
-function Main() {
+function Init() {
     if (GL === null) {
         throw new Error("WebGL is not supported");
     }
     else {
         CANVAS.width = window.innerWidth;
         CANVAS.height = window.innerHeight;
-        var VertexShaderSource = "#version 100\n\n            attribute mediump vec2 aPosition;\n \n            void main(void){gl_Position = vec4(aPosition, 1, 1);}";
-        var FragmentShaderSource = "#version 100\n\n            precision mediump float;\n \n            void main(void){gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);}";
+        var VertexShaderSource = "#version 100\n            attribute mediump vec2 aPosition;\n            void main(void){gl_Position = vec4(aPosition, 1, 1);}";
+        var FragmentShaderSource = "#version 100\n            precision mediump float;\n            void main(void){gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);}";
+        var ShaderProgram = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
         var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
         var Indices = new Uint16Array([0, 1, 2]);
         var VertexBuffer = GL.createBuffer();
@@ -38,16 +39,6 @@ function Main() {
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
         GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Indices, GL.STATIC_DRAW);
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-        var VertexShader = GL.createShader(GL.VERTEX_SHADER);
-        GL.shaderSource(VertexShader, VertexShaderSource);
-        GL.compileShader(VertexShader);
-        var FragmentShader = GL.createShader(GL.FRAGMENT_SHADER);
-        GL.shaderSource(FragmentShader, FragmentShaderSource);
-        GL.compileShader(FragmentShader);
-        var ShaderProgram = GL.createProgram();
-        GL.attachShader(ShaderProgram, VertexShader);
-        GL.attachShader(ShaderProgram, FragmentShader);
-        GL.linkProgram(ShaderProgram);
         GL.useProgram(ShaderProgram);
         GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
         var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
@@ -61,4 +52,4 @@ function Main() {
         GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
     }
 }
-Main();
+Init();

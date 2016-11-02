@@ -32,6 +32,16 @@ var Vec2 = (function () {
         return new Float32Array([0, 0]);
     };
     /**
+     * Creates a new vector from given values
+     *
+     * @param X {number}: x value
+     * @param Y {number}: y value
+     * @returns {Float32Array}
+     */
+    Vec2.FromValues = function (X, Y) {
+        return new Float32Array([X, Y]);
+    };
+    /**
      * Adds two given vectors
      *
      * @param OutVec {Float32Array}: result vector
@@ -234,6 +244,17 @@ var Vec3 = (function () {
         return new Float32Array([0, 0, 0]);
     };
     /**
+     * Creates a new vector from given values
+     *
+     * @param X {number}: x value
+     * @param Y {number}: y value
+     * @param Z {number}: z value
+     * @returns {Float32Array}
+     */
+    Vec3.FromValues = function (X, Y, Z) {
+        return new Float32Array([X, Y, Z]);
+    };
+    /**
      * Adds two given vectors
      *
      * @param OutVec {Float32Array}: result vector
@@ -420,7 +441,7 @@ var Vec3 = (function () {
      * @returns {string}
      */
     Vec3.ToString = function (GivenVec) {
-        return "Vec3: [" + GivenVec[0] + ", " + GivenVec[1] + "," + GivenVec[2] + "]";
+        return "Vec3: [" + GivenVec[0] + ", " + GivenVec[1] + ", " + GivenVec[2] + "]";
     };
     return Vec3;
 }());
@@ -456,6 +477,18 @@ var Vec4 = (function () {
      */
     Vec4.Create = function () {
         return new Float32Array([0, 0, 0, 0]);
+    };
+    /**
+     * Creates a new vector from given values
+     *
+     * @param X {number}: x value
+     * @param Y {number}: y value
+     * @param Z {number}: z value
+     * @param W {number}: w value
+     * @returns {Float32Array}
+     */
+    Vec4.FromValues = function (X, Y, Z, W) {
+        return new Float32Array([X, Y, Z, W]);
     };
     /**
      * Adds two given vectors
@@ -640,7 +673,7 @@ var Vec4 = (function () {
      * @returns {string}
      */
     Vec4.ToString = function (GivenVec) {
-        return "Vec4: [" + GivenVec[0] + ", " + GivenVec[1] + "," + GivenVec[2] + "," + GivenVec[3] + "]";
+        return "Vec4: [" + GivenVec[0] + ", " + GivenVec[1] + ", " + GivenVec[2] + ", " + GivenVec[3] + "]";
     };
     return Vec4;
 }());

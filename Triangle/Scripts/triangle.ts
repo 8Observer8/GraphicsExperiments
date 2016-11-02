@@ -1,3 +1,5 @@
+declare let CompileShaders: any;
+
 /* Canvas element */
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 
@@ -27,7 +29,7 @@ window.addEventListener("resize", Resize);
  * 
  * @returns void
  */
-function Main()
+function Init()
 {
     if(GL === null)
     {
@@ -39,14 +41,15 @@ function Main()
 
         CANVAS.height = window.innerHeight;
 
-
-        const VertexShaderSource: string = `#version 100\n
-            attribute mediump vec2 aPosition;\n 
+        const VertexShaderSource: string = `#version 100
+            attribute mediump vec2 aPosition;
             void main(void){gl_Position = vec4(aPosition, 1, 1);}`;
 
-        const FragmentShaderSource: string = `#version 100\n
-            precision mediump float;\n 
+        const FragmentShaderSource: string = `#version 100
+            precision mediump float;
             void main(void){gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);}`;
+
+        let ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
         const Vertices: Float32Array = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
 
@@ -67,26 +70,6 @@ function Main()
             GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Indices, GL.STATIC_DRAW);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-
-        let VertexShader: WebGLShader | null = GL.createShader(GL.VERTEX_SHADER);
-
-        GL.shaderSource(VertexShader, VertexShaderSource);
-
-        GL.compileShader(VertexShader);
-
-        let FragmentShader: WebGLShader | null = GL.createShader(GL.FRAGMENT_SHADER);
-
-        GL.shaderSource(FragmentShader, FragmentShaderSource);
-
-        GL.compileShader(FragmentShader);
-
-        let ShaderProgram: WebGLProgram | null = GL.createProgram();
-
-        GL.attachShader(ShaderProgram, VertexShader);
-
-        GL.attachShader(ShaderProgram, FragmentShader);
-
-        GL.linkProgram(ShaderProgram);
 
         GL.useProgram(ShaderProgram);
 
@@ -112,4 +95,4 @@ function Main()
     }
 }
 
-Main();
+Init();

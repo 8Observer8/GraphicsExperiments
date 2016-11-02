@@ -9,8 +9,8 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "outDir": "Build/",
-        "removeComments": false,
+        "outFile": "Build/dev.js",
+        "removeComments": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "strictNullChecks": true,
@@ -18,7 +18,6 @@
         "module": "none"
     },
     "files": [
-        "Scripts/triangle.ts",
-        "Scripts/main.ts"
+        "Scripts/shaders.ts"
     ]
 }

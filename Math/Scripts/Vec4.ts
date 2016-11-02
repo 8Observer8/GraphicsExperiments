@@ -16,13 +16,13 @@
 */
 
 /******************************************************************************************************************************************/
-/*														 Vec3 Class																		  */
+/*														 Vec4 Class																		  */
 /*																																		  */
-/*	Vec3 class is responsible for 3D vector operations necessary for graphics applications. All functions are inlined.					  */
+/*	Vec4 class is responsible for 4D vector operations necessary for graphics applications. All functions are inlined.					  */
 /*																																		  */
 /******************************************************************************************************************************************/
 
-abstract class Vec3
+abstract class Vec4
 {
     /**
      * Creates a new vector 
@@ -31,7 +31,21 @@ abstract class Vec3
      */
     public static Create(): Float32Array
     {
-        return new Float32Array([0, 0, 0]);
+        return new Float32Array([0, 0, 0, 0]);
+    }
+
+    /**
+     * Creates a new vector from given values
+     * 
+     * @param X {number}: x value 
+     * @param Y {number}: y value 
+     * @param Z {number}: z value
+     * @param W {number}: w value
+     * @returns {Float32Array}
+     */
+    public static FromValues(X: number, Y: number, Z: number, W: number): Float32Array
+    {
+        return new Float32Array([X, Y, Z, W]);
     }
 
     /**
@@ -47,6 +61,7 @@ abstract class Vec3
         OutVec[0] = FirstVec[0] + SecondVec[0];
         OutVec[1] = FirstVec[1] + SecondVec[1];
         OutVec[2] = FirstVec[2] + SecondVec[2];
+        OutVec[3] = FirstVec[3] + SecondVec[3];
     }
 
     /**
@@ -62,6 +77,7 @@ abstract class Vec3
         OutVec[0] = FirstVec[0] - SecondVec[0];
         OutVec[1] = FirstVec[1] - SecondVec[1];
         OutVec[2] = FirstVec[2] - SecondVec[2];
+        OutVec[3] = FirstVec[3] - SecondVec[3];
     }
 
     /**
@@ -72,7 +88,7 @@ abstract class Vec3
      */
     public static Copy(VecToCopy: Float32Array): Float32Array
     {
-        return new Float32Array([VecToCopy[0], VecToCopy[1], VecToCopy[2]]);
+        return new Float32Array([VecToCopy[0], VecToCopy[1], VecToCopy[2], VecToCopy[3]]);
     }
 
     /**
@@ -87,6 +103,7 @@ abstract class Vec3
         OutVec[0] = VecToClone[0];
         OutVec[1] = VecToClone[1];
         OutVec[2] = VecToClone[2];
+        OutVec[3] = VecToClone[3];
     }
 
     /**
@@ -101,8 +118,9 @@ abstract class Vec3
         const X: number = SecondVec[0] - FirstVec[0];
         const Y: number = SecondVec[1] - FirstVec[1];
         const Z: number = SecondVec[2] - FirstVec[2];
+        const W: number = SecondVec[3] - FirstVec[3];
 
-        return Math.sqrt(X * X + Y * Y + Z * Z);
+        return Math.sqrt(X * X + Y * Y + Z * Z + W * W);
     }
 
     /**
@@ -117,8 +135,9 @@ abstract class Vec3
         const X: number = SecondVec[0] - FirstVec[0];
         const Y: number = SecondVec[1] - FirstVec[1];
         const Z: number = SecondVec[2] - FirstVec[2];
+        const W: number = SecondVec[3] - FirstVec[3];
 
-        return X * X + Y * Y + Z * Z;
+        return X * X + Y * Y + Z * Z + W * W;
     }
 
     /**
@@ -130,22 +149,7 @@ abstract class Vec3
      */
     public static Dot(FirstVec: Float32Array, SecondVec: Float32Array): number
     {
-        return FirstVec[0] * SecondVec[0] + FirstVec[1] * SecondVec[1] + FirstVec[2] * SecondVec[2];
-    }
-
-    /**
-     * Computes the cross product of given two orthogonal vectors 
-     * 
-     * @param OutVec {Float32Array}: result vector 
-     * @param FirstVec {Float32Array}: first vector 
-     * @param SecondVec {Float32Array}: second vector 
-     * @returns {void}
-     */
-    public static Cross(OutVec: Float32Array, FirstVec: Float32Array, SecondVec: Float32Array): void 
-    {
-        OutVec[0] = FirstVec[1] * SecondVec[2] - FirstVec[2] * SecondVec[1];
-        OutVec[1] = FirstVec[2] * SecondVec[0] - FirstVec[0] * SecondVec[2];
-        OutVec[2] = FirstVec[0] * SecondVec[1] - FirstVec[1] * SecondVec[0];
+        return FirstVec[0] * SecondVec[0] + FirstVec[1] * SecondVec[1] + FirstVec[2] * SecondVec[2] + FirstVec[3] * SecondVec[3];
     }
 
     /**
@@ -157,7 +161,7 @@ abstract class Vec3
      */
     public static bEquals(FirstVec: Float32Array, SecondVec: Float32Array): boolean
     {
-        return FirstVec[0] === SecondVec[0] && FirstVec[1] === SecondVec[1] && FirstVec[2] === SecondVec[2];
+        return FirstVec[0] === SecondVec[0] && FirstVec[1] === SecondVec[1] && FirstVec[2] === SecondVec[2] && FirstVec[3] === SecondVec[3];
     }
 
     /**
@@ -168,7 +172,7 @@ abstract class Vec3
      */
     public static Length(GivenVec: Float32Array): number
     {
-        return Math.sqrt(GivenVec[0] * GivenVec[0] + GivenVec[1] * GivenVec[1] + GivenVec[2] * GivenVec[2]);
+        return Math.sqrt(GivenVec[0] * GivenVec[0] + GivenVec[1] * GivenVec[1] + GivenVec[2] * GivenVec[2] + GivenVec[3] * GivenVec[3]);
     }
 
     /**
@@ -179,7 +183,7 @@ abstract class Vec3
      */
     public static SquaredLength(GivenVec: Float32Array): number
     {
-        return GivenVec[0] * GivenVec[0] + GivenVec[1] * GivenVec[1] + GivenVec[2] * GivenVec[2];
+        return GivenVec[0] * GivenVec[0] + GivenVec[1] * GivenVec[1] + GivenVec[2] * GivenVec[2] + GivenVec[3] * GivenVec[3];
     }
 
     /**
@@ -196,6 +200,7 @@ abstract class Vec3
         OutVec[0] = FirstVec[0] + Amount * (SecondVec[0] - FirstVec[0]);
         OutVec[1] = FirstVec[1] + Amount * (SecondVec[1] - FirstVec[1]);
         OutVec[2] = FirstVec[2] + Amount * (SecondVec[2] - FirstVec[2]);
+        OutVec[3] = FirstVec[3] + Amount * (SecondVec[3] - FirstVec[3]);
     }
 
     /**
@@ -211,6 +216,7 @@ abstract class Vec3
         OutVec[0] = FirstVec[0] * SecondVec[0];
         OutVec[1] = FirstVec[1] * SecondVec[1];
         OutVec[2] = FirstVec[2] * SecondVec[2];
+        OutVec[3] = FirstVec[3] * SecondVec[3];
     }
 
     /**
@@ -226,6 +232,7 @@ abstract class Vec3
         OutVec[0] = FirstVec[0] * Amount;
         OutVec[1] = FirstVec[1] * Amount;
         OutVec[2] = FirstVec[2] * Amount;
+        OutVec[3] = FirstVec[3] * Amount;
     }
 
     /**
@@ -237,7 +244,7 @@ abstract class Vec3
      */
     public static Normalize(OutVec: Float32Array, VecToNormalize: Float32Array): void
     {
-        let SquaredLength: number = VecToNormalize[0] * VecToNormalize[0] + VecToNormalize[1] * VecToNormalize[1] + VecToNormalize[2] * VecToNormalize[2];
+        let SquaredLength: number = VecToNormalize[0] * VecToNormalize[0] + VecToNormalize[1] * VecToNormalize[1] + VecToNormalize[2] * VecToNormalize[2] + VecToNormalize[3] * VecToNormalize[3];
 
         if(SquaredLength > 0)
         {
@@ -246,6 +253,7 @@ abstract class Vec3
             OutVec[0] = VecToNormalize[0] * SquaredLength;
             OutVec[1] = VecToNormalize[1] * SquaredLength;
             OutVec[2] = VecToNormalize[2] * SquaredLength;
+            OutVec[3] = VecToNormalize[3] * SquaredLength;
         }
     }
 
@@ -257,6 +265,6 @@ abstract class Vec3
      */
     public static ToString(GivenVec: Float32Array): string 
     {
-        return "Vec3: [" + GivenVec[0] + ", " + GivenVec[1] + "," + GivenVec[2] + "]";
+        return "Vec4: [" + GivenVec[0] + ", " + GivenVec[1] + ", " + GivenVec[2] + ", " + GivenVec[3] + "]";
     }
 }

@@ -9,14 +9,16 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "outDir": "Scripts/JS",
+        "outDir": "Build/",
         "removeComments": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "strictNullChecks": true,
-        "target": "es3"
+        "target": "es3",
+        "module": "none"
     },
     "files": [
-        "Scripts/TS/default.ts"
+        "Scripts/default.ts",
+        "Scripts/main.ts"
     ]
 }

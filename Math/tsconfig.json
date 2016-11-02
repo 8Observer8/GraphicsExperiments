@@ -9,19 +9,20 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "outFile": "Math.js",
+        "outFile": "Build/Math.js",
         "removeComments": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "strictNullChecks": true,
-        "target": "es3"
+        "target": "es3",
+        "module": "none"
     },
     "files": [
-        "Vec2.ts",
-        "Vec3.ts",
-        "Vec4.ts",
-        "Mat2.ts",
-        "mat3.ts",
-        "Mat4.ts"
+        "Scripts/Vec2.ts",
+        "Scripts/Vec3.ts",
+        "Scripts/Vec4.ts",
+        "Scripts/Mat2.ts",
+        "Scripts/Mat3.ts",
+        "Scripts/Mat4.ts"
     ]
 }
