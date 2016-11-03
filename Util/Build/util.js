@@ -1,3 +1,4 @@
+"use strict";
 var Editor = (function () {
     function Editor(ScriptLocation, bClearConsole) {
         this.ScriptLocation = ScriptLocation;

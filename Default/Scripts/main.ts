@@ -1,5 +1,7 @@
 declare const Editor: any;
 
+"use strict";
+
 /**
  * Main function 
  * 

@@ -1,3 +1,4 @@
+"use strict";
 function CompileShaders(GL, VertexShaderSource, FragmentShaderSource) {
     var VertexShader = GL.createShader(GL.VERTEX_SHADER);
     GL.shaderSource(VertexShader, VertexShaderSource);

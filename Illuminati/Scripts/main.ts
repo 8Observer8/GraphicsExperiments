@@ -9,7 +9,7 @@ declare const Editor: any;
  */
 function Main(): void
 {
-    const NewEditor: any = <any>new Editor("Build/quatRot.js", true);
+    const NewEditor: any = <any>new Editor("Build/illuminati.js", true);
 
     NewEditor.Init();
 }

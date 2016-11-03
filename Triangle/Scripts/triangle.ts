@@ -1,6 +1,8 @@
 declare let CompileShaders: any;
 declare let GenTriangle: any;
 
+"use strict";
+
 /* Source of vertex shader */
 const VertexShaderSource: string = "#version 100\n" +
                                    "attribute mediump vec2 aPosition;\n" +

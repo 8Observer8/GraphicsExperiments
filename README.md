@@ -8,3 +8,4 @@
 * Test 2: [Triangle Rendering](https://omarhuseynov011.github.io/GraphicsExperiments/Triangle/)
 * Test 3: [2D Euler Rotation](https://omarhuseynov011.github.io/GraphicsExperiments/EulerRotation/)
 * Test 4: [3D Quaternion Rotation](https://omarhuseynov011.github.io/GraphicsExperiments/QuatRotation/)
+* Test 5: [Illuminati (Texture mapping)](https://omarhuseynov011.github.io/GraphicsExperiments/Illuminati/)

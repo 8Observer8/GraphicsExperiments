@@ -1,3 +1,4 @@
+"use strict";
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);

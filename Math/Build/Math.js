@@ -20,6 +20,7 @@
 /*	Vec2 class is responsible for 2D vector operations necessary for graphics applications. All functions are inlined.					  */
 /*																																		  */
 /******************************************************************************************************************************************/
+"use strict";
 var Vec2 = (function () {
     function Vec2() {
     }

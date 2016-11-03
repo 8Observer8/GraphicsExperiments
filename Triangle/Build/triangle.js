@@ -1,3 +1,4 @@
+"use strict";
 /* Source of vertex shader */
 var VertexShaderSource = "#version 100\n" +
     "attribute mediump vec2 aPosition;\n" +

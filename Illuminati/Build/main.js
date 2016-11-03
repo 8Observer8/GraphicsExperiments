@@ -5,7 +5,7 @@
  * @returns {void}
  */
 function Main() {
-    var NewEditor = new Editor("Build/triangle.js", true);
+    var NewEditor = new Editor("Build/illuminati.js", true);
     NewEditor.Init();
 }
 /* Wait until the window finishes loading */

@@ -15,6 +15,8 @@
 * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+"use strict";
+
 /**
  * Compiles the given shaders and returns the program object
  * 

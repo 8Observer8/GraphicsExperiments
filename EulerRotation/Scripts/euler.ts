@@ -5,6 +5,8 @@ declare let Vec3: any;
 declare let Mat3: any;
 declare let Mat4: any;
 
+"use strict";
+
 /******************************** SHADERS *********************************/
 
 /* Source of vertex shader */

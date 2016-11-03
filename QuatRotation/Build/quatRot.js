@@ -1,3 +1,4 @@
+"use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
 var VertexShaderSource = "#version 100\n" +
