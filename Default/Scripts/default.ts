@@ -8,6 +8,11 @@ document.body.appendChild(CANVAS);
 /* WebGL context */
 const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false});
 
+if(GL === null)
+{
+    throw new Error("WebGL is not supported");
+}
+
 /**
  * Resizes the context 
  * 
@@ -31,22 +36,15 @@ window.addEventListener("resize", Resize);
  */
 function Init(): void
 {
-    if(GL === null)
-    {
-        throw new Error("WebGL is not supported");
-    }
-    else
-    {
-        CANVAS.width = window.innerWidth;
+    CANVAS.width = window.innerWidth;
 
-        CANVAS.height = window.innerHeight;
+    CANVAS.height = window.innerHeight;
 
-        GL.clearColor(0.5, 0.5, 1.0, 1.0);
+    GL.clearColor(0.5, 0.5, 1.0, 1.0);
 
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
 
-        GL.clear(GL.COLOR_BUFFER_BIT);
-    }
+    GL.clear(GL.COLOR_BUFFER_BIT);
 }
 
 Init();

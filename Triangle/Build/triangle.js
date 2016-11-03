@@ -13,9 +13,12 @@ var FragmentShaderSource = "#version 100\n" +
     "}\n";
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
+document.body.appendChild(CANVAS);
 /* WebGL context */
 var GL = CANVAS.getContext("webgl", { antialias: false });
-document.body.appendChild(CANVAS);
+if (GL === null) {
+    throw new Error("WebGL is not supported");
+}
 /**
  * Resizes the context
  *
@@ -33,33 +36,28 @@ window.addEventListener("resize", Resize);
  * @returns void
  */
 function Init() {
-    if (GL === null) {
-        throw new Error("WebGL is not supported");
-    }
-    else {
-        CANVAS.width = window.innerWidth;
-        CANVAS.height = window.innerHeight;
-        var ShaderProgram = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
-        var Triangle = GenTriangle();
-        var VertexBuffer = GL.createBuffer();
-        var IndexBuffer = GL.createBuffer();
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-        GL.bufferData(GL.ARRAY_BUFFER, Triangle.Vertices, GL.STATIC_DRAW);
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
-        GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Triangle.Indices, GL.STATIC_DRAW);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-        GL.useProgram(ShaderProgram);
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-        var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-        GL.enableVertexAttribArray(VertexPosition);
-        GL.vertexAttribPointer(VertexPosition, Triangle.VertexSize, GL.FLOAT, false, 0, 0);
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
-        GL.clearColor(0.5, 0.5, 1.0, 1.0);
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
-        GL.clear(GL.COLOR_BUFFER_BIT);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
-        GL.drawElements(GL.TRIANGLES, Triangle.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    }
+    CANVAS.width = window.innerWidth;
+    CANVAS.height = window.innerHeight;
+    var ShaderProgram = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
+    var Triangle = GenTriangle();
+    var VertexBuffer = GL.createBuffer();
+    var IndexBuffer = GL.createBuffer();
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+    GL.bufferData(GL.ARRAY_BUFFER, Triangle.Vertices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Triangle.Indices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.useProgram(ShaderProgram);
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
+    GL.enableVertexAttribArray(VertexPosition);
+    GL.vertexAttribPointer(VertexPosition, Triangle.VertexSize, GL.FLOAT, false, 0, 0);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.clearColor(0.5, 0.5, 1.0, 1.0);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
+    GL.clear(GL.COLOR_BUFFER_BIT);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.drawElements(GL.TRIANGLES, Triangle.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 }
 Init();

@@ -37,10 +37,15 @@ const FragmentShaderSource: string = "#version 100\n" +
 /* Canvas element */
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 
+document.body.appendChild(CANVAS);
+
 /* WebGL context */
 const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false});
 
-document.body.appendChild(CANVAS);
+if(GL === null)
+{
+    throw new Error("WebGL is not supported");
+}
 
 /**************************************************************************/
 
@@ -64,16 +69,16 @@ const Cube: any = GenCube();
 const CubeColors: Float32Array = new Float32Array(
     [
         // Front face
-        1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0, 
-        1.0, 1.0, 1.0, 
-        1.0, 1.0, 1.0, 
+        1.0, 0.5, 0.25,
+        1.0, 0.5, 0.25, 
+        1.0, 0.5, 0.25, 
+        1.0, 0.5, 0.25, 
 
         // Back face
-        0.25, 0.5, 1.0, 
-        0.25, 0.5, 1.0, 
-        0.25, 0.5, 1.0, 
-        0.25, 0.5, 1.0
+        0.5, 1.0, 0.25, 
+        0.5, 1.0, 0.25, 
+        0.5, 1.0, 0.25, 
+        0.5, 1.0, 0.25
     ]);
 
 /* Vertex buffer to hold vertex data */
@@ -188,66 +193,59 @@ window.addEventListener("resize", Resize);
  */
 function Init()
 {
-    if(GL === null)
-    {
-        throw new Error("WebGL is not sZ_Axisported");
-    }
-    else
-    {
-        CANVAS.width = window.innerWidth;
+    CANVAS.width = window.innerWidth;
 
-        CANVAS.height = window.innerHeight;
+    CANVAS.height = window.innerHeight;
 
-        AspectRatio = CANVAS.width / CANVAS.height;
+    AspectRatio = CANVAS.width / CANVAS.height;
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+
+        GL.bufferData(GL.ARRAY_BUFFER, Cube.Vertices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+        GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
+
+        GL.bufferData(GL.ARRAY_BUFFER, CubeColors, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+    GL.useProgram(ShaderProgram);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.bufferData(GL.ARRAY_BUFFER, Cube.Vertices, GL.STATIC_DRAW);
+            let VertexPosition: number = GL.getAttribLocation(ShaderProgram, "aPosition");
+
+            GL.enableVertexAttribArray(VertexPosition);
+
+            GL.vertexAttribPointer(VertexPosition, Cube.VertexSize, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
-
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
-
-            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
-
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
 
-            GL.bufferData(GL.ARRAY_BUFFER, CubeColors, GL.STATIC_DRAW);
+            let ColorPosition: number = GL.getAttribLocation(ShaderProgram, "aColor");
+
+            GL.enableVertexAttribArray(ColorPosition);
+
+            GL.vertexAttribPointer(ColorPosition, 3, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.useProgram(ShaderProgram);
+    GL.useProgram(null);
 
-            GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
 
-                let VertexPosition: number = GL.getAttribLocation(ShaderProgram, "aPosition");
+    GL.enable(GL.DEPTH_TEST);
 
-                GL.enableVertexAttribArray(VertexPosition);
-
-                GL.vertexAttribPointer(VertexPosition, Cube.VertexSize, GL.FLOAT, false, 0, 0);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, null);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
-
-                let ColorPosition: number = GL.getAttribLocation(ShaderProgram, "aColor");
-
-                GL.enableVertexAttribArray(ColorPosition);
-
-                GL.vertexAttribPointer(ColorPosition, 3, GL.FLOAT, false, 0, 0);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, null);
-
-        GL.useProgram(null);
-
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
-
-        GL.enable(GL.DEPTH_TEST);
-
-        requestAnimationFrame(Render);
-    }
+    requestAnimationFrame(Render);
 }
 
 /**

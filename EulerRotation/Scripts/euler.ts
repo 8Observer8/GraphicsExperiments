@@ -32,10 +32,15 @@ const FragmentShaderSource: string = "#version 100\n" +
 /* Canvas element */
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 
+document.body.appendChild(CANVAS);
+
 /* WebGL context */
 const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false});
 
-document.body.appendChild(CANVAS);
+if(GL === null)
+{
+    throw new Error("WebGL is not supported");
+}
 
 /**************************************************************************/
 
@@ -138,48 +143,41 @@ window.addEventListener("resize", Resize);
  */
 function Init()
 {
-    if(GL === null)
-    {
-        throw new Error("WebGL is not supported");
-    }
-    else
-    {
-        CANVAS.width = window.innerWidth;
+    CANVAS.width = window.innerWidth;
 
-        CANVAS.height = window.innerHeight;
+    CANVAS.height = window.innerHeight;
 
-        AspectRatio = CANVAS.height / CANVAS.width;
+    AspectRatio = CANVAS.height / CANVAS.width;
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+
+        GL.bufferData(GL.ARRAY_BUFFER, Quad.Vertices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+        GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Quad.Indices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+
+    GL.useProgram(ShaderProgram);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.bufferData(GL.ARRAY_BUFFER, Quad.Vertices, GL.STATIC_DRAW);
+            let VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
+
+            GL.enableVertexAttribArray(VertexPosition);
+
+            GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.useProgram(null);
 
-            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Quad.Indices, GL.STATIC_DRAW);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-
-        GL.useProgram(ShaderProgram);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-
-                let VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-
-                GL.enableVertexAttribArray(VertexPosition);
-
-                GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
-
-            GL.bindBuffer(GL.ARRAY_BUFFER, null);
-
-        GL.useProgram(null);
-
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
-
-        requestAnimationFrame(Render);
-    }
+    requestAnimationFrame(Render);
 }
 
 /**

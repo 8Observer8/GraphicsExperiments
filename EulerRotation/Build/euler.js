@@ -18,9 +18,12 @@ var FragmentShaderSource = "#version 100\n" +
 /********************************** INIT **********************************/
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
+document.body.appendChild(CANVAS);
 /* WebGL context */
 var GL = CANVAS.getContext("webgl", { antialias: false });
-document.body.appendChild(CANVAS);
+if (GL === null) {
+    throw new Error("WebGL is not supported");
+}
 /**************************************************************************/
 /******************************** CONSTANTS *******************************/
 var TO_RADIAN = Math.PI / 180.0;
@@ -83,29 +86,24 @@ window.addEventListener("resize", Resize);
  * @returns void
  */
 function Init() {
-    if (GL === null) {
-        throw new Error("WebGL is not supported");
-    }
-    else {
-        CANVAS.width = window.innerWidth;
-        CANVAS.height = window.innerHeight;
-        AspectRatio = CANVAS.height / CANVAS.width;
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-        GL.bufferData(GL.ARRAY_BUFFER, Quad.Vertices, GL.STATIC_DRAW);
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
-        GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Quad.Indices, GL.STATIC_DRAW);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
-        GL.useProgram(ShaderProgram);
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-        var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-        GL.enableVertexAttribArray(VertexPosition);
-        GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
-        GL.useProgram(null);
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
-        requestAnimationFrame(Render);
-    }
+    CANVAS.width = window.innerWidth;
+    CANVAS.height = window.innerHeight;
+    AspectRatio = CANVAS.height / CANVAS.width;
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+    GL.bufferData(GL.ARRAY_BUFFER, Quad.Vertices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Quad.Indices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.useProgram(ShaderProgram);
+    GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
+    GL.enableVertexAttribArray(VertexPosition);
+    GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.useProgram(null);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
+    requestAnimationFrame(Render);
 }
 /**
  * Rotates the quad

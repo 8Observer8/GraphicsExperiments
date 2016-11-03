@@ -4,6 +4,9 @@ var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
 var GL = CANVAS.getContext("webgl", { antialias: false });
+if (GL === null) {
+    throw new Error("WebGL is not supported");
+}
 /**
  * Resizes the context
  *
@@ -21,15 +24,10 @@ window.addEventListener("resize", Resize);
  * @returns void
  */
 function Init() {
-    if (GL === null) {
-        throw new Error("WebGL is not supported");
-    }
-    else {
-        CANVAS.width = window.innerWidth;
-        CANVAS.height = window.innerHeight;
-        GL.clearColor(0.5, 0.5, 1.0, 1.0);
-        GL.viewport(0, 0, CANVAS.width, CANVAS.height);
-        GL.clear(GL.COLOR_BUFFER_BIT);
-    }
+    CANVAS.width = window.innerWidth;
+    CANVAS.height = window.innerHeight;
+    GL.clearColor(0.5, 0.5, 1.0, 1.0);
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
+    GL.clear(GL.COLOR_BUFFER_BIT);
 }
 Init();
