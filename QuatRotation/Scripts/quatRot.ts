@@ -1,6 +1,7 @@
 declare let CompileShaders: any;
-declare let GenQuad: any;
+declare let GenCube: any;
 declare let Vec2: any;
+declare let Quat: any;
 declare let Vec3: any;
 declare let Mat3: any;
 declare let Mat4: any;
@@ -9,11 +10,11 @@ declare let Mat4: any;
 
 /* Source of vertex shader */
 const VertexShaderSource: string = "#version 100\n" +
-                                   "attribute mediump vec2 aPosition;\n" +
-                                   "uniform mediump mat4 uProjection;\n" +
+                                   "attribute mediump vec3 aPosition;\n" +
+                                   "uniform mediump mat4 Z_Axisrojection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
                                    "void main(void){\n" +
-                                   "gl_Position = uProjection * uModelView * vec4(aPosition, 1, 1);\n" +
+                                   "gl_Position = Z_Axisrojection * uModelView * vec4(aPosition, 1);\n" +
                                    "}\n";
 
 /* Source of fragment shader */
@@ -41,13 +42,17 @@ document.body.appendChild(CANVAS);
 
 const TO_RADIAN: number = Math.PI / 180.0;
 
-const UP: Float32Array = Vec3.FromValues(0, 1, 0);
+const Axis_X: Float32Array = Vec3.FromValues(1, 0, 0);
+
+const Axis_Y: Float32Array = Vec3.FromValues(0, 1, 0);
+
+const Axis_Z: Float32Array = Vec3.FromValues(0, 0, 1);
 
 /* Shading program */
 const ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
-/* Quad mesh */
-const Quad: any = GenQuad();
+/* Cube mesh */
+const Cube: any = GenCube();
 
 /* Vertex buffer to hold vertex data */
 const VertexBuffer: WebGLBuffer | null = GL.createBuffer();
@@ -71,6 +76,7 @@ let AspectRatio: number;
 
 /********************************* CAMERA *********************************/
 
+/* Position of the camera */
 let CameraPosition: Float32Array = Vec3.FromValues(0, 0, 10);
 
 /* Projection matrix for the camera  */
@@ -82,9 +88,12 @@ let CameraViewMat: Float32Array = Mat4.Create();
 /* Position the camera is looking at */
 const CameraLookAt: Float32Array = Vec3.Create();
 
+/* Fielf of view */
+const CameraFOV: number = 75.0 * TO_RADIAN;
+
 /**************************************************************************/
 
-/********************************** QUAD **********************************/
+/********************************** CUBE **********************************/
 
 /* Model Matrix of the quad */
 let ModelMat: Float32Array = Mat4.Create();
@@ -93,13 +102,31 @@ let ModelMat: Float32Array = Mat4.Create();
 let ModelViewMat: Float32Array = Mat4.Create();
 
 /* Position of the quad */
-let QuadPosition: Float32Array = Vec2.Create();
+let CubePosition: Float32Array = Vec3.Create();
 
-/* Rotation value of the quad around z axis */
-let QuadRotationZ: number = 0.0 * TO_RADIAN;
+/* Rotation value of the quad */
+let CubeQuatRotation: Float32Array = Quat.Create();
+
+/* Rotation around X axis */
+let CubeQuatRotationX: Float32Array = Quat.Create();
+
+/* Rotation around Y axis */
+let CubeQuatRotationY: Float32Array = Quat.Create();
+
+/* Rotation around Z axis */
+let CubeQuatRotationZ: Float32Array = Quat.Create();
 
 /* Scaling vector of the quad */
-let QuadScaling: Float32Array = Vec2.FromValues(0.5, 0.5);
+let CubeScaling: Float32Array = Vec3.FromValues(1.5, 1.5, 1.5);
+
+/* Cube's orientation around X axis */
+let CubeRotationX: number = 0.0;
+
+/* Cube's orientation around Y axis */
+let CubeRotationY: number = 0.0;
+
+/* Cube's orientation around Z axis */
+let CubeRotationZ: number = 0.0;
 
 /**************************************************************************/
 
@@ -107,7 +134,7 @@ let QuadScaling: Float32Array = Vec2.FromValues(0.5, 0.5);
 
 const uModelViewLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uModelView");
 
-const uProjectionLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uProjection");
+const uProjectionLocation: number = <number>GL.getUniformLocation(ShaderProgram, "Z_Axisrojection");
 
 /**************************************************************************/
 
@@ -122,7 +149,7 @@ function Resize()
 
     CANVAS.height = window.innerHeight;
 
-    AspectRatio = CANVAS.height / CANVAS.width;
+    AspectRatio = CANVAS.width / CANVAS.height;
 
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
 }
@@ -138,7 +165,7 @@ function Init()
 {
     if(GL === null)
     {
-        throw new Error("WebGL is not supported");
+        throw new Error("WebGL is not sZ_Axisported");
     }
     else
     {
@@ -146,17 +173,17 @@ function Init()
 
         CANVAS.height = window.innerHeight;
 
-        AspectRatio = CANVAS.height / CANVAS.width;
+        AspectRatio = CANVAS.width / CANVAS.height;
 
         GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.bufferData(GL.ARRAY_BUFFER, Quad.Vertices, GL.STATIC_DRAW);
+            GL.bufferData(GL.ARRAY_BUFFER, Cube.Vertices, GL.STATIC_DRAW);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
-            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Quad.Indices, GL.STATIC_DRAW);
+            GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
@@ -168,7 +195,7 @@ function Init()
 
                 GL.enableVertexAttribArray(VertexPosition);
 
-                GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
+                GL.vertexAttribPointer(VertexPosition, Cube.VertexSize, GL.FLOAT, false, 0, 0);
 
             GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
@@ -188,24 +215,45 @@ function Init()
  */
 function RotateQuad(DeltaTime: number): void 
 {
-    QuadRotationZ += 0.1 * TO_RADIAN * DeltaTime;
 
-    if(QuadRotationZ > 2.0 * Math.PI)
+    CubeRotationX += 0.1 * TO_RADIAN * DeltaTime;
+
+    CubeRotationY += 0.1 * TO_RADIAN * DeltaTime;
+
+    CubeRotationZ += 0.1 * TO_RADIAN * DeltaTime;
+
+    if(CubeRotationX > 2.0 * Math.PI || CubeRotationX < -2.0 * Math.PI)
     {
-        QuadRotationZ = 0.0;
+        CubeRotationX = 0.0;
     }
-    else if(QuadRotationZ < -2.0 * Math.PI)
+
+    if(CubeRotationY > 2.0 * Math.PI || CubeRotationY < -2.0 * Math.PI)
     {
-        QuadRotationZ = 0.0;
+        CubeRotationY = 0.0;
     }
 
-    Mat3.FromRotationTranslationScale(ModelMat, QuadPosition, QuadRotationZ, QuadScaling);
+    if(CubeRotationZ > 2.0 * Math.PI || CubeRotationZ < -2.0 * Math.PI)
+    {
+        CubeRotationZ = 0.0;
+    }
 
-    Mat4.CreateViewMat(CameraViewMat, CameraPosition, CameraLookAt, UP);
+    Quat.SetFromAxisAngle(CubeQuatRotationX, Axis_X, CubeRotationX);
+
+    Quat.SetFromAxisAngle(CubeQuatRotationY, Axis_Y, CubeRotationY);
+
+    Quat.SetFromAxisAngle(CubeQuatRotationZ, Axis_Z, CubeRotationZ);
+
+    Quat.Multiply(CubeQuatRotation, CubeQuatRotationX, CubeQuatRotationY);
+
+    Quat.Multiply(CubeQuatRotation, CubeQuatRotation, CubeQuatRotationZ);
+
+    Mat4.FromRotationTranslationScale(ModelMat, CubeQuatRotation, CubePosition, CubeScaling);
+
+    Mat4.CreateViewMat(CameraViewMat, CameraPosition, CameraLookAt, Axis_Y);
 
     Mat4.Multiply(ModelViewMat, CameraViewMat, ModelMat);
 
-    Mat4.CreateOrthographicProjectionMat(CameraProjectionMat, -1.0, 1.0, AspectRatio, -AspectRatio, 1.0, 100.0);
+    Mat4.CreatePerspectiveProjectionMat(CameraProjectionMat, AspectRatio, CameraFOV, 1.0, 100.0);
 }
 
 /**
@@ -244,7 +292,7 @@ function Render(): void
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
-            GL.drawElements(GL.TRIANGLES, Quad.NumOfIndices, GL.UNSIGNED_SHORT, 0);
+            GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 

@@ -1448,5 +1448,174 @@ var Mat4 = (function () {
         OutMat[14] = 2.0 * Far * Near * NF;
         OutMat[15] = 0;
     };
+    /**
+     * Creates 4X4 model matrix from given rotation, translation and scale
+     *
+     * @param OutMat {Float32Array}: result matrix
+     * @param QuatRotation {Float32Array}: quaternion rotation
+     * @param TranslationVector {Float32Array}: translation vector
+     * @param ScalingVector {Float32Array}: scaling vector
+     * @returns {void}
+     */
+    Mat4.FromRotationTranslationScale = function (OutMat, QuatRotation, TranslationVector, ScalingVector) {
+        var QX = QuatRotation[0], QY = QuatRotation[1], QZ = QuatRotation[2], QW = QuatRotation[3];
+        var X2 = QX + QX, Y2 = QY + QY, Z2 = QZ + QZ;
+        var XX = QX * X2, YX = QY * X2, YY = QY * Y2;
+        var ZX = QZ * X2, ZY = QZ * Y2, ZZ = QZ * Z2;
+        var WX = QW * X2, WY = QW * Y2, WZ = QW * Z2;
+        OutMat[0] = (1 - YY - ZZ) * ScalingVector[0];
+        OutMat[1] = YX + WZ;
+        OutMat[2] = ZX - WY;
+        OutMat[3] = 0;
+        OutMat[4] = YX - WZ;
+        OutMat[5] = (1 - XX - ZZ) * ScalingVector[1];
+        OutMat[6] = ZY + WX;
+        OutMat[7] = 0;
+        OutMat[8] = ZX + WY;
+        OutMat[9] = ZY - WX;
+        OutMat[10] = (1 - XX - YY) * ScalingVector[2];
+        OutMat[11] = 0;
+        OutMat[12] = TranslationVector[0];
+        OutMat[13] = TranslationVector[1];
+        OutMat[14] = TranslationVector[2];
+        OutMat[15] = 1;
+    };
     return Mat4;
+}());
+/*
+* The MIT License (MIT)
+* Copyright (c) <2016> <Omar Huseynov>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+* documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+* persons to whom the Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+* ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+* THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+/******************************************************************************************************************************************/
+/*														 Quat Class																		  */
+/*																																		  */
+/*	Quat class is responsible for representing 3D rotations and orientations                                        					  */
+/*																																		  */
+/******************************************************************************************************************************************/
+var Quat = (function () {
+    function Quat() {
+    }
+    /**
+     * Returns a new quat
+     *
+     * @returns {Float32Array}
+     */
+    Quat.Create = function () {
+        return new Float32Array([0, 0, 0, 1]);
+    };
+    /**
+     * Copies the given quat
+     *
+     * @param QuatToCopy {Float32Array}: quat to copy
+     * @returns {Float32Array}
+     */
+    Quat.Copy = function (QuatToCopy) {
+        return new Float32Array([QuatToCopy[0], QuatToCopy[1], QuatToCopy[2], QuatToCopy[3]]);
+    };
+    /**
+     * Clones the given quat
+     *
+     * @param OutQuat {Float32Array}: result quat
+     * @param QuatToClone {Float32Array}: quat to copy
+     * @returns {void}
+     */
+    Quat.Clone = function (OutQuat, QuatToClone) {
+        OutQuat[0] = QuatToClone[0];
+        OutQuat[1] = QuatToClone[1];
+        OutQuat[2] = QuatToClone[2];
+        OutQuat[3] = QuatToClone[3];
+    };
+    /**
+     * Returns true if two given quats are equal, false otherwise
+     *
+     * @param FirstQuat {Float32Array}: first quat
+     * @param SecondQuat {Float32Array}: second quat
+     * @return {boolean}
+     */
+    Quat.bEquals = function (FirstQuat, SecondQuat) {
+        return FirstQuat[0] === SecondQuat[0] && FirstQuat[1] === SecondQuat[1] && FirstQuat[2] === SecondQuat[2] && FirstQuat[3] === SecondQuat[3];
+    };
+    /**
+     * Sets the given quat to identity quat
+     *
+     * @param GivenQuat {Float32Array}: given quat
+     * @returns {void}
+     */
+    Quat.SetIdentity = function (GivenQuat) {
+        GivenQuat[0] = 0;
+        GivenQuat[1] = 0;
+        GivenQuat[2] = 0;
+        GivenQuat[3] = 1;
+    };
+    /**
+     * Sets a quaternion from given axis of rotation and degree of rotation in radians
+     *
+     * @param OutQuat {Float32Array}: result quat
+     * @param Axis {Float32Array}: axis of rotation
+     * @param Angle {number}: angle in radians
+     * @returns {void}
+     */
+    Quat.SetFromAxisAngle = function (OutQuat, Axis, Angle) {
+        Angle *= 0.5;
+        var S = Math.sin(Angle);
+        OutQuat[0] = S * Axis[0];
+        OutQuat[1] = S * Axis[1];
+        OutQuat[2] = S * Axis[2];
+        OutQuat[3] = Math.cos(Angle);
+    };
+    /**
+     * Multiplies two given quats
+     *
+     * @param OutQuat {Float32Array}: result quat
+     * @param FirstQuat {Float32Array}: first quat
+     * @param SecondQuat {Float32Array}: second quat
+     * @returns {void}
+     */
+    Quat.Multiply = function (OutQuat, FirstQuat, SecondQuat) {
+        var AX = FirstQuat[0], AY = FirstQuat[1], AZ = FirstQuat[2], AW = FirstQuat[3];
+        var BX = SecondQuat[0], BY = SecondQuat[1], BZ = SecondQuat[2], BW = SecondQuat[3];
+        OutQuat[0] = AX * BW + AW * BX + AY * BZ - AZ * BY;
+        OutQuat[1] = AY * BW + AW * BY + AZ * BX - AX * BZ;
+        OutQuat[2] = AZ * BW + AW * BZ + AX * BY - AY * BX;
+        OutQuat[3] = AW * BW - AX * BX - AY * BY - AZ * BZ;
+    };
+    /**
+     * Normalizes the given quat
+     *
+     * @param OutQuat {Float32Array}: result quat
+     * @param QuatToNormalize {Float32Array}: quat to normalize
+     * @returns {void}
+     */
+    Quat.Normalize = function (OutQuat, QuatToNormalize) {
+        var SquaredLength = QuatToNormalize[0] * QuatToNormalize[0] + QuatToNormalize[1] * QuatToNormalize[1] + QuatToNormalize[2] * QuatToNormalize[2] + QuatToNormalize[3] * QuatToNormalize[3];
+        if (SquaredLength > 0) {
+            SquaredLength = 1.0 / Math.sqrt(SquaredLength);
+            OutQuat[0] = QuatToNormalize[0] * SquaredLength;
+            OutQuat[1] = QuatToNormalize[1] * SquaredLength;
+            OutQuat[2] = QuatToNormalize[2] * SquaredLength;
+            OutQuat[3] = QuatToNormalize[3] * SquaredLength;
+        }
+    };
+    /**
+     * Returns the string representation of the given quat
+     *
+     * @param GivenQuat {Float32Array}: given quat
+     * @returns {string}
+     */
+    Quat.ToString = function (GivenQuat) {
+        return "Vec4: [" + GivenQuat[0] + ", " + GivenQuat[1] + ", " + GivenQuat[2] + ", " + GivenQuat[3] + "]";
+    };
+    return Quat;
 }());

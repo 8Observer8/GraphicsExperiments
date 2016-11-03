@@ -480,4 +480,40 @@ abstract class Mat4
 
         OutMat[15] = 0;
     }
+
+    /**
+     * Creates 4X4 model matrix from given rotation, translation and scale 
+     * 
+     * @param OutMat {Float32Array}: result matrix 
+     * @param QuatRotation {Float32Array}: quaternion rotation 
+     * @param TranslationVector {Float32Array}: translation vector
+     * @param ScalingVector {Float32Array}: scaling vector
+     * @returns {void}
+     */
+    public static FromRotationTranslationScale(OutMat: Float32Array, QuatRotation: Float32Array, TranslationVector: Float32Array, ScalingVector: Float32Array): void 
+    {
+        const QX: number = QuatRotation[0], QY: number = QuatRotation[1], QZ: number = QuatRotation[2], QW: number = QuatRotation[3];
+
+        const X2: number = QX + QX, Y2: number = QY + QY, Z2: number = QZ + QZ;
+        const XX: number = QX * X2, YX: number = QY * X2, YY: number = QY * Y2;
+        const ZX: number = QZ * X2, ZY: number = QZ * Y2, ZZ: number = QZ * Z2;
+        const WX: number = QW * X2, WY: number = QW * Y2, WZ: number = QW * Z2;
+
+        OutMat[0] = (1 - YY - ZZ) * ScalingVector[0];
+        OutMat[1] = YX + WZ;
+        OutMat[2] = ZX - WY;
+        OutMat[3] = 0;
+        OutMat[4] = YX - WZ;
+        OutMat[5] = (1 - XX - ZZ) * ScalingVector[1];
+        OutMat[6] = ZY + WX;
+        OutMat[7] = 0;
+        OutMat[8] = ZX + WY;
+        OutMat[9] = ZY - WX;
+        OutMat[10] = (1 - XX - YY) * ScalingVector[2];
+        OutMat[11] = 0;
+        OutMat[12] = TranslationVector[0];
+        OutMat[13] = TranslationVector[1];
+        OutMat[14] = TranslationVector[2];
+        OutMat[15] = 1;
+    }
 }

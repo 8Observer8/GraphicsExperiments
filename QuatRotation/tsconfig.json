@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "outFile": "Build/Math.js",
+        "outDir": "Build/",
         "removeComments": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
@@ -18,12 +18,7 @@
         "module": "none"
     },
     "files": [
-        "Scripts/Vec2.ts",
-        "Scripts/Vec3.ts",
-        "Scripts/Vec4.ts",
-        "Scripts/Mat2.ts",
-        "Scripts/Mat3.ts",
-        "Scripts/Mat4.ts",
-        "Scripts/Quat.ts"
+        "Scripts/quatRot.ts",
+        "Scripts/main.ts"
     ]
 }

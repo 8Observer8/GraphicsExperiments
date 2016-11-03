@@ -78,3 +78,57 @@ function GenQuad(): Mesh
 
     return QuadMesh;
 }
+
+/**
+ * Generates a new cube 
+ * 
+ * @returns {Mesh}
+ */
+function GenCube(): Mesh 
+{
+    const Vertices: Float32Array = new Float32Array(
+        [
+             /* FRONT */
+            -1.0, -1.0,  1.0,
+             1.0, -1.0,  1.0,
+             1.0,  1.0,  1.0,
+            -1.0,  1.0,  1.0,
+
+            /* BACK */
+            -1.0, -1.0, -1.0,
+             1.0, -1.0, -1.0,
+             1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0
+        ]);
+
+    const Indices: Uint16Array = new Uint16Array(
+        [
+            /* FRONT */
+            0, 1, 2,
+            2, 3, 0,
+
+            /* TOP */
+            1, 5, 6,
+            6, 2, 1,
+
+            /* BACK */
+            7, 6, 5,
+            5, 4, 7,
+
+            /* BOTTOM */
+            4, 0, 3,
+            3, 7, 4,
+
+            /* LEFT */
+            4, 5, 1,
+            1, 0, 4,
+
+            /* RIGHT */
+            3, 2, 6,
+            6, 7, 3
+        ]);
+
+    let CubeMesh: Mesh = new Mesh(Vertices, Indices, 3, Indices.length);
+
+    return CubeMesh;
+}
