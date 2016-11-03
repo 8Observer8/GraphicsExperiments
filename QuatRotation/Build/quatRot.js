@@ -69,7 +69,7 @@ var CubeQuatRotationY = Quat.Create();
 /* Rotation around Z axis */
 var CubeQuatRotationZ = Quat.Create();
 /* Scaling vector of the quad */
-var CubeScaling = Vec3.FromValues(1.5, 1.5, 1.5);
+var CubeScaling = Vec3.FromValues(1, 1, 1);
 /* Cube's orientation around X axis */
 var CubeRotationX = 0.0;
 /* Cube's orientation around Y axis */

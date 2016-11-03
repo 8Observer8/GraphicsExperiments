@@ -117,7 +117,7 @@ let CubeQuatRotationY: Float32Array = Quat.Create();
 let CubeQuatRotationZ: Float32Array = Quat.Create();
 
 /* Scaling vector of the quad */
-let CubeScaling: Float32Array = Vec3.FromValues(1.5, 1.5, 1.5);
+let CubeScaling: Float32Array = Vec3.FromValues(1, 1, 1);
 
 /* Cube's orientation around X axis */
 let CubeRotationX: number = 0.0;
