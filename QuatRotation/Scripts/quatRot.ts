@@ -11,17 +11,21 @@ declare let Mat4: any;
 /* Source of vertex shader */
 const VertexShaderSource: string = "#version 100\n" +
                                    "attribute mediump vec3 aPosition;\n" +
+                                   "attribute mediump vec3 aColor;\n" +
                                    "uniform mediump mat4 Z_Axisrojection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
+                                   "varying mediump vec3 vColor;\n" +
                                    "void main(void){\n" +
                                    "gl_Position = Z_Axisrojection * uModelView * vec4(aPosition, 1);\n" +
+                                   "vColor = aColor;\n" +
                                    "}\n";
 
 /* Source of fragment shader */
 const FragmentShaderSource: string = "#version 100\n" +
                                      "precision mediump float;\n" +
+                                     "varying vec3 vColor;\n" +
                                      "void main(void){\n" +
-                                     "gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);\n" +
+                                     "gl_FragColor = vec4(vColor, 1.0);\n" +
                                      "}\n";
 
 /**************************************************************************/
@@ -54,11 +58,30 @@ const ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource
 /* Cube mesh */
 const Cube: any = GenCube();
 
+/* Colors */
+const CubeColors: Float32Array = new Float32Array(
+    [
+        // Front face
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 1.0, 
+
+        // Back face
+        0.25, 0.5, 1.0, 
+        0.25, 0.5, 1.0, 
+        0.25, 0.5, 1.0, 
+        0.25, 0.5, 1.0
+    ]);
+
 /* Vertex buffer to hold vertex data */
 const VertexBuffer: WebGLBuffer | null = GL.createBuffer();
 
 /* Index buffer to hold index data */
 const IndexBuffer: WebGLBuffer | null = GL.createBuffer();
+
+/* Color buffer to store the color data */
+const ColorBuffer: WebGLBuffer | null = GL.createBuffer();
 
 /**************************************************************************/
 
@@ -187,11 +210,17 @@ function Init()
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
+        GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
+
+            GL.bufferData(GL.ARRAY_BUFFER, CubeColors, GL.STATIC_DRAW);
+
+        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
         GL.useProgram(ShaderProgram);
 
             GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-                let VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
+                let VertexPosition: number = GL.getAttribLocation(ShaderProgram, "aPosition");
 
                 GL.enableVertexAttribArray(VertexPosition);
 
@@ -199,9 +228,21 @@ function Init()
 
             GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
+            GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
+
+                let ColorPosition: number = GL.getAttribLocation(ShaderProgram, "aColor");
+
+                GL.enableVertexAttribArray(ColorPosition);
+
+                GL.vertexAttribPointer(ColorPosition, 3, GL.FLOAT, false, 0, 0);
+
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
         GL.useProgram(null);
 
         GL.viewport(0, 0, CANVAS.width, CANVAS.height);
+
+        GL.enable(GL.DEPTH_TEST);
 
         requestAnimationFrame(Render);
     }
@@ -282,7 +323,7 @@ function Render(): void
 
     GL.clearColor(0.5, 0.5, 1.0, 1.0);
 
-    GL.clear(GL.COLOR_BUFFER_BIT);
+    GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     GL.useProgram(ShaderProgram);
 
