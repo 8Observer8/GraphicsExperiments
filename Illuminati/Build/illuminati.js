@@ -263,12 +263,12 @@ function HandleTriangle(DeltaTime) {
         TrianglePosition[1] += TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
     }
     else if (bS_Pressed) {
-        TrianglePosition[0] += TRANSLATION_SPEED * DeltaTime * Math.sin(PI_2 - TriangleRotationZ);
-        TrianglePosition[1] += TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
+        TrianglePosition[0] -= TRANSLATION_SPEED * DeltaTime * Math.sin(PI_2 - TriangleRotationZ);
+        TrianglePosition[1] -= TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
     }
     if (bA_Pressed) {
-        TrianglePosition[0] += TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
-        TrianglePosition[1] += TRANSLATION_SPEED * DeltaTime * Math.sin(TriangleRotationZ);
+        TrianglePosition[0] -= TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
+        TrianglePosition[1] -= TRANSLATION_SPEED * DeltaTime * Math.sin(TriangleRotationZ);
     }
     else if (bD_Pressed) {
         TrianglePosition[0] += TRANSLATION_SPEED * DeltaTime * Math.cos(TriangleRotationZ);
