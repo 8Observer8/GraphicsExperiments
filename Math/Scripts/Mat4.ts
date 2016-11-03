@@ -499,17 +499,17 @@ abstract class Mat4
         const ZX: number = QZ * X2, ZY: number = QZ * Y2, ZZ: number = QZ * Z2;
         const WX: number = QW * X2, WY: number = QW * Y2, WZ: number = QW * Z2;
 
-        OutMat[0] = (1 - YY - ZZ) * ScalingVector[0];
-        OutMat[1] = YX + WZ;
-        OutMat[2] = ZX - WY;
+        OutMat[0] = (1 - (YY + ZZ)) * ScalingVector[0];
+        OutMat[1] = (YX + WZ) * ScalingVector[0];
+        OutMat[2] = (ZX - WY) * ScalingVector[0];
         OutMat[3] = 0;
-        OutMat[4] = YX - WZ;
-        OutMat[5] = (1 - XX - ZZ) * ScalingVector[1];
-        OutMat[6] = ZY + WX;
+        OutMat[4] = (YX - WZ) * ScalingVector[1];
+        OutMat[5] = (1 - (XX + ZZ)) * ScalingVector[1];
+        OutMat[6] = (ZY + WX) * ScalingVector[1];
         OutMat[7] = 0;
-        OutMat[8] = ZX + WY;
-        OutMat[9] = ZY - WX;
-        OutMat[10] = (1 - XX - YY) * ScalingVector[2];
+        OutMat[8] = (ZX + WY) * ScalingVector[2];
+        OutMat[9] = (ZY - WX) * ScalingVector[2];
+        OutMat[10] = (1 - (XX + YY)) * ScalingVector[2];
         OutMat[11] = 0;
         OutMat[12] = TranslationVector[0];
         OutMat[13] = TranslationVector[1];
