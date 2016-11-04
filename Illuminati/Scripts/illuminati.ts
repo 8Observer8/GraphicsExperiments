@@ -38,7 +38,7 @@ const FragmentShaderSource: string = "#version 100\n" +
 const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false});
+const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false}) || CANVAS.getContext("experimental-webgl", {antialias: false});
 
 if(GL === null)
 {

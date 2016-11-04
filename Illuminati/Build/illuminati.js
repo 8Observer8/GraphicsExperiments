@@ -24,7 +24,7 @@ var FragmentShaderSource = "#version 100\n" +
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
 if (GL === null) {
     throw new Error("WebGL is not supported");
 }
