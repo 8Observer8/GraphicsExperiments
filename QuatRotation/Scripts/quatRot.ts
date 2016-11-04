@@ -14,11 +14,11 @@ declare let Mat4: any;
 const VertexShaderSource: string = "#version 100\n" +
                                    "attribute mediump vec3 aPosition;\n" +
                                    "attribute mediump vec3 aColor;\n" +
-                                   "uniform mediump mat4 Z_Axisrojection;\n" +
+                                   "uniform mediump mat4 uProjection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
                                    "varying mediump vec3 vColor;\n" +
                                    "void main(void){\n" +
-                                   "gl_Position = Z_Axisrojection * uModelView * vec4(aPosition, 1);\n" +
+                                   "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
                                    "vColor = aColor;\n" +
                                    "}\n";
 
@@ -164,7 +164,7 @@ let CubeRotationZ: number = 0.0;
 
 const uModelViewLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uModelView");
 
-const uProjectionLocation: number = <number>GL.getUniformLocation(ShaderProgram, "Z_Axisrojection");
+const uProjectionLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uProjection");
 
 /**************************************************************************/
 

@@ -4,11 +4,11 @@
 var VertexShaderSource = "#version 100\n" +
     "attribute mediump vec3 aPosition;\n" +
     "attribute mediump vec3 aColor;\n" +
-    "uniform mediump mat4 Z_Axisrojection;\n" +
+    "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "varying mediump vec3 vColor;\n" +
     "void main(void){\n" +
-    "gl_Position = Z_Axisrojection * uModelView * vec4(aPosition, 1);\n" +
+    "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vColor = aColor;\n" +
     "}\n";
 /* Source of fragment shader */
@@ -102,7 +102,7 @@ var CubeRotationZ = 0.0;
 /**************************************************************************/
 /******************************** LOCATIONS *******************************/
 var uModelViewLocation = GL.getUniformLocation(ShaderProgram, "uModelView");
-var uProjectionLocation = GL.getUniformLocation(ShaderProgram, "Z_Axisrojection");
+var uProjectionLocation = GL.getUniformLocation(ShaderProgram, "uProjection");
 /**************************************************************************/
 /**
  * Resizes the context
