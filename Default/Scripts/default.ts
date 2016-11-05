@@ -1,3 +1,6 @@
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
+
 "use strict";
 
 /* Canvas element */

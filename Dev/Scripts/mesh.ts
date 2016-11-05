@@ -23,8 +23,11 @@ class Mesh
     /* Indices of the mesh */
     public Indices: Uint16Array;
 
-    /* Size of one vertex */
-    public VertexSize: number;
+    /* Texture coordinates of the mesh */
+    public TextureCoordinates: Float32Array;
+
+    /* Normals of the mesh */
+    public Normals: Float32Array | null;
 
     /* Total number of indices */
     public NumOfIndices: number;
@@ -34,14 +37,19 @@ class Mesh
      * 
      * @param Vertices {Float32Array}: vertices 
      * @param Indices {Uint16Array}: indices 
+     * @param TextureCoordinates {Float32Array}: texture coordinates 
+     * @param Normals {Float32Array}: normals 
+     * @param NumOfIndices {number}: number of indices
      */
-    constructor(Vertices: Float32Array, Indices: Uint16Array, VertexSize: number, NumOfIndices: number)
+    constructor(Vertices: Float32Array, Indices: Uint16Array, TextureCoordinates: Float32Array, Normals: Float32Array | null, NumOfIndices: number)
     {
         this.Vertices = Vertices;
 
         this.Indices = Indices;
 
-        this.VertexSize = VertexSize;
+        this.TextureCoordinates = TextureCoordinates;
+
+        this.Normals = Normals;
 
         this.NumOfIndices = NumOfIndices;
     }
@@ -58,7 +66,11 @@ function GenTriangle(): Mesh
 
     const Indices: Uint16Array = new Uint16Array([0, 1, 2]);
 
-    let TriangleMesh: Mesh = new Mesh(Vertices, Indices, 2, Indices.length);
+    const TextureCoordinates: Float32Array = new Float32Array([0.0, 0.0, 1.0, 0.0, 0.5, 1.0]);
+
+    const Normals: Float32Array | null = null;
+
+    const TriangleMesh: Mesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
 
     return TriangleMesh;
 }
@@ -74,7 +86,11 @@ function GenQuad(): Mesh
 
     const Indices: Uint16Array = new Uint16Array([0, 1, 2, 2, 1, 3]);
 
-    let QuadMesh: Mesh = new Mesh(Vertices, Indices, 2, Indices.length);
+    const TextureCoordinates: Float32Array = new Float32Array([0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]);
+
+    const Normals: Float32Array | null = null;
+
+    const QuadMesh: Mesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
 
     return QuadMesh;
 }
@@ -88,47 +104,127 @@ function GenCube(): Mesh
 {
     const Vertices: Float32Array = new Float32Array(
         [
-             /* FRONT */
+             // Front face
             -1.0, -1.0,  1.0,
-             1.0, -1.0,  1.0,
-             1.0,  1.0,  1.0,
+            1.0, -1.0,  1.0,
+            1.0,  1.0,  1.0,
             -1.0,  1.0,  1.0,
-
-            /* BACK */
+            
+            // Back face
             -1.0, -1.0, -1.0,
-             1.0, -1.0, -1.0,
-             1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            1.0,  1.0, -1.0,
+            1.0, -1.0, -1.0,
+            
+            // Top face
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0, -1.0,
+            
+            // Bottom face
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,
+            
+            // Right face
+            1.0, -1.0, -1.0,
+            1.0,  1.0, -1.0,
+            1.0,  1.0,  1.0,
+            1.0, -1.0,  1.0,
+            
+            // Left face
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            -1.0,  1.0,  1.0,
             -1.0,  1.0, -1.0
         ]);
 
     const Indices: Uint16Array = new Uint16Array(
         [
-            /* FRONT */
-            0, 1, 2,
-            2, 3, 0,
-
-            /* TOP */
-            1, 5, 6,
-            6, 2, 1,
-
-            /* BACK */
-            7, 6, 5,
-            5, 4, 7,
-
-            /* BOTTOM */
-            4, 0, 3,
-            3, 7, 4,
-
-            /* LEFT */
-            4, 5, 1,
-            1, 0, 4,
-
-            /* RIGHT */
-            3, 2, 6,
-            6, 7, 3
+            0,  1,  2,      0,  2,  3,    // front
+            4,  5,  6,      4,  6,  7,    // back
+            8,  9,  10,     8,  10, 11,   // top
+            12, 13, 14,     12, 14, 15,   // bottom
+            16, 17, 18,     16, 18, 19,   // right
+            20, 21, 22,     20, 22, 23    // left
         ]);
 
-    let CubeMesh: Mesh = new Mesh(Vertices, Indices, 3, Indices.length);
+    const TextureCoordinates: Float32Array = new Float32Array(
+        [
+            // Front
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0,
+            // Back
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0,
+            // Top
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0,
+            // Bottom
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0,
+            // Right
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0,
+            // Left
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0
+        ]);
+
+    const Normals: Float32Array = new Float32Array(
+        [
+            // Front
+            0.0,  0.0,  1.0,
+            0.0,  0.0,  1.0,
+            0.0,  0.0,  1.0,
+            0.0,  0.0,  1.0,
+            
+            // Back
+            0.0,  0.0, -1.0,
+            0.0,  0.0, -1.0,
+            0.0,  0.0, -1.0,
+            0.0,  0.0, -1.0,
+            
+            // Top
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+            
+            // Bottom
+            0.0, -1.0,  0.0,
+            0.0, -1.0,  0.0,
+            0.0, -1.0,  0.0,
+            0.0, -1.0,  0.0,
+            
+            // Right
+            1.0,  0.0,  0.0,
+            1.0,  0.0,  0.0,
+            1.0,  0.0,  0.0,
+            1.0,  0.0,  0.0,
+            
+            // Left
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0
+        ]);
+
+    const CubeMesh: Mesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
 
     return CubeMesh;
 }

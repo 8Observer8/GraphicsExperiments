@@ -44,7 +44,7 @@ class Editor
      * @constructor
      * 
      * @param ScriptLocation {string}: location of the script file to load and run
-     * @param bClearConsole {boolean}: 2hether to clear the console or not
+     * @param bClearConsole {boolean}: whether to clear the console or not
      */
     constructor(ScriptLocation: string, bClearConsole: boolean)
     {

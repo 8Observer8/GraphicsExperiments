@@ -9,7 +9,7 @@
  */
 function Main(): void
 {
-    const NewEditor: Editor = new Editor("Build/default.js", true);
+    const NewEditor: Editor = new Editor("Build/FPSCamera.js", true);
 
     NewEditor.Init();
 }

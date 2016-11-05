@@ -1,10 +1,5 @@
-declare let CompileShaders: any;
-declare let GenCube: any;
-declare let Vec2: any;
-declare let Quat: any;
-declare let Vec3: any;
-declare let Mat3: any;
-declare let Mat4: any;
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
 
 "use strict";
 

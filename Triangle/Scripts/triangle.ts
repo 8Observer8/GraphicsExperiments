@@ -1,5 +1,5 @@
-declare let CompileShaders: any;
-declare let GenTriangle: any;
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
 
 "use strict";
 

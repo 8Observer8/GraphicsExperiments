@@ -27,10 +27,11 @@ function CompileShaders(GL, VertexShaderSource, FragmentShaderSource) {
     return ShaderProgram;
 }
 var Mesh = (function () {
-    function Mesh(Vertices, Indices, VertexSize, NumOfIndices) {
+    function Mesh(Vertices, Indices, TextureCoordinates, Normals, NumOfIndices) {
         this.Vertices = Vertices;
         this.Indices = Indices;
-        this.VertexSize = VertexSize;
+        this.TextureCoordinates = TextureCoordinates;
+        this.Normals = Normals;
         this.NumOfIndices = NumOfIndices;
     }
     return Mesh;
@@ -38,13 +39,17 @@ var Mesh = (function () {
 function GenTriangle() {
     var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]);
     var Indices = new Uint16Array([0, 1, 2]);
-    var TriangleMesh = new Mesh(Vertices, Indices, 2, Indices.length);
+    var TextureCoordinates = new Float32Array([0.0, 0.0, 1.0, 0.0, 0.5, 1.0]);
+    var Normals = null;
+    var TriangleMesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
     return TriangleMesh;
 }
 function GenQuad() {
     var Vertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]);
     var Indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
-    var QuadMesh = new Mesh(Vertices, Indices, 2, Indices.length);
+    var TextureCoordinates = new Float32Array([0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]);
+    var Normals = null;
+    var QuadMesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
     return QuadMesh;
 }
 function GenCube() {
@@ -54,24 +59,86 @@ function GenCube() {
         1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0,
         -1.0, -1.0, -1.0,
+        -1.0, 1.0, -1.0,
+        1.0, 1.0, -1.0,
+        1.0, -1.0, -1.0,
+        -1.0, 1.0, -1.0,
+        -1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, -1.0,
+        -1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, 1.0,
+        -1.0, -1.0, 1.0,
         1.0, -1.0, -1.0,
         1.0, 1.0, -1.0,
+        1.0, 1.0, 1.0,
+        1.0, -1.0, 1.0,
+        -1.0, -1.0, -1.0,
+        -1.0, -1.0, 1.0,
+        -1.0, 1.0, 1.0,
         -1.0, 1.0, -1.0
     ]);
     var Indices = new Uint16Array([
-        0, 1, 2,
-        2, 3, 0,
-        1, 5, 6,
-        6, 2, 1,
-        7, 6, 5,
-        5, 4, 7,
-        4, 0, 3,
-        3, 7, 4,
-        4, 5, 1,
-        1, 0, 4,
-        3, 2, 6,
-        6, 7, 3
+        0, 1, 2, 0, 2, 3,
+        4, 5, 6, 4, 6, 7,
+        8, 9, 10, 8, 10, 11,
+        12, 13, 14, 12, 14, 15,
+        16, 17, 18, 16, 18, 19,
+        20, 21, 22, 20, 22, 23
     ]);
-    var CubeMesh = new Mesh(Vertices, Indices, 3, Indices.length);
+    var TextureCoordinates = new Float32Array([
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
+    ]);
+    var Normals = new Float32Array([
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0
+    ]);
+    var CubeMesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
     return CubeMesh;
 }

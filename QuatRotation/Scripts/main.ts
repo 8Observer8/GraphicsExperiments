@@ -1,4 +1,4 @@
-declare const Editor: any;
+/// <reference path="../../Util/Util.d.ts" />
 
 "use strict";
 
@@ -9,7 +9,7 @@ declare const Editor: any;
  */
 function Main(): void
 {
-    const NewEditor: any = <any>new Editor("Build/quatRot.js", true);
+    const NewEditor: Editor = new Editor("Build/quatRot.js", true);
 
     NewEditor.Init();
 }
