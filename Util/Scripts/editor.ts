@@ -28,14 +28,14 @@ class Editor
     /* Ace editor */
     private static AceEditor: any;
 
+    /* Frame object */
+    private static Frame: HTMLIFrameElement;
+
     /* Content of the frame */
     private static FrameContent: Document;
 
     /* Div element containing editor */
     private EditorDiv: HTMLDivElement;
-
-    /* Frame object */
-    private Frame: HTMLIFrameElement;
 
     /* Location of the script file to load and run */
     private ScriptLocation: string;
@@ -63,33 +63,45 @@ class Editor
         this.InitEditor();
 
         this.InitFrame();
+    }
 
-        Editor.ReloadFrame(Editor.FrameContent, Editor.AceEditor);
+    /**
+     * Replaces the content of the frame 
+     * 
+     * @returns {void}
+     */
+    private static ReplaceFrameContent(): void 
+    {
+        Editor.FrameContent = Editor.Frame.contentWindow.document;
+
+        Editor.FrameContent.open();
+
+        Editor.FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/>");
+
+        Editor.FrameContent.write("<body></body>");
+
+        Editor.FrameContent.write("<script src='../Math/Build/Math.min.js'></script>");
+
+        Editor.FrameContent.write("<script src='../Dev/Build/dev.js'></script>");
+
+        Editor.FrameContent.write("<script>" + Editor.AceEditor.getValue() + "</script>");
+
+        Editor.FrameContent.close();
     }
 
     /**
      * Reloaded the frame 
      */
-    private static ReloadFrame(FrameContent: Document, AceEditor: any): void 
+    private static ReloadFrame(): void 
     {
         if(Editor.bClearConsole)
         {
             console.clear();
         }
 
-        FrameContent.open();
+        Editor.Frame.src = Editor.Frame.src;
 
-        FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/>");
-
-        FrameContent.write("<body></body>");
-
-        FrameContent.write("<script src='../Math/Build/Math.min.js'></script>");
-
-        FrameContent.write("<script src='../Dev/Build/dev.js'></script>");
-
-        FrameContent.write("<script>" + AceEditor.getValue() + "</script>");
-
-        FrameContent.close();
+        Editor.Frame.onload = Editor.ReplaceFrameContent;
     }
 
     /**
@@ -130,13 +142,18 @@ class Editor
      */
     private InitFrame(): void
     {
-        this.Frame = <HTMLIFrameElement>document.getElementById("demoFrame");
+        Editor.Frame = <HTMLIFrameElement>document.getElementById("demoFrame");
 
-        Editor.FrameContent = this.Frame.contentWindow.document;
+        Editor.FrameContent = Editor.Frame.contentWindow.document;
 
-        Editor.AceEditor.getSession().on('change', function()
+        document.addEventListener("keydown", function(Evt: KeyboardEvent)
         {
-            Editor.ReloadFrame(Editor.FrameContent, Editor.AceEditor);
+
+            if(Evt.ctrlKey && Evt.keyCode === 13) // ENTER 
+            {
+                Editor.ReloadFrame();
+            }
+
         });
 
         var Client = new XMLHttpRequest();
@@ -146,6 +163,8 @@ class Editor
         Client.onreadystatechange = function() 
         {
             Editor.AceEditor.setValue(Client.responseText);
+
+            Editor.ReloadFrame();
         }
 
         Client.send();

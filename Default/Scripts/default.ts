@@ -1,7 +1,7 @@
 "use strict";
 
 /* Canvas element */
-const CANVAS: HTMLCanvasElement = document.createElement("canvas");
+const CANVAS: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("canvas");
 
 document.body.appendChild(CANVAS);
 

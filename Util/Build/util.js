@@ -7,19 +7,23 @@ var Editor = (function () {
     Editor.prototype.Init = function () {
         this.InitEditor();
         this.InitFrame();
-        Editor.ReloadFrame(Editor.FrameContent, Editor.AceEditor);
     };
-    Editor.ReloadFrame = function (FrameContent, AceEditor) {
+    Editor.ReplaceFrameContent = function () {
+        Editor.FrameContent = Editor.Frame.contentWindow.document;
+        Editor.FrameContent.open();
+        Editor.FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/>");
+        Editor.FrameContent.write("<body></body>");
+        Editor.FrameContent.write("<script src='../Math/Build/Math.min.js'></script>");
+        Editor.FrameContent.write("<script src='../Dev/Build/dev.js'></script>");
+        Editor.FrameContent.write("<script>" + Editor.AceEditor.getValue() + "</script>");
+        Editor.FrameContent.close();
+    };
+    Editor.ReloadFrame = function () {
         if (Editor.bClearConsole) {
             console.clear();
         }
-        FrameContent.open();
-        FrameContent.write("<link rel='stylesheet' href='../Styles/normalize.css'/>");
-        FrameContent.write("<body></body>");
-        FrameContent.write("<script src='../Math/Build/Math.min.js'></script>");
-        FrameContent.write("<script src='../Dev/Build/dev.js'></script>");
-        FrameContent.write("<script>" + AceEditor.getValue() + "</script>");
-        FrameContent.close();
+        Editor.Frame.src = Editor.Frame.src;
+        Editor.Frame.onload = Editor.ReplaceFrameContent;
     };
     Editor.prototype.InitEditor = function () {
         Editor.AceEditor = ace.edit("editor");
@@ -37,15 +41,18 @@ var Editor = (function () {
         Editor.AceEditor.setHighlightActiveLine(true);
     };
     Editor.prototype.InitFrame = function () {
-        this.Frame = document.getElementById("demoFrame");
-        Editor.FrameContent = this.Frame.contentWindow.document;
-        Editor.AceEditor.getSession().on('change', function () {
-            Editor.ReloadFrame(Editor.FrameContent, Editor.AceEditor);
+        Editor.Frame = document.getElementById("demoFrame");
+        Editor.FrameContent = Editor.Frame.contentWindow.document;
+        document.addEventListener("keydown", function (Evt) {
+            if (Evt.ctrlKey && Evt.keyCode === 13) {
+                Editor.ReloadFrame();
+            }
         });
         var Client = new XMLHttpRequest();
         Client.open('GET', this.ScriptLocation);
         Client.onreadystatechange = function () {
             Editor.AceEditor.setValue(Client.responseText);
+            Editor.ReloadFrame();
         };
         Client.send();
     };
