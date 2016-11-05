@@ -67,7 +67,7 @@ const PI_2: number = Math.PI * 2.0;
 let ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
 /* Triangle mesh */
-const Triangle: any = GenTriangle();
+const Triangle: Mesh = GenTriangle();
 
 /* Vertex buffer to hold vertex data */
 const VertexBuffer: WebGLBuffer | null = GL.createBuffer();
@@ -380,7 +380,7 @@ function Init()
 
             GL.enableVertexAttribArray(VertexPosition);
 
-            GL.vertexAttribPointer(VertexPosition, Triangle.VertexSize, GL.FLOAT, false, 0, 0);
+            GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 

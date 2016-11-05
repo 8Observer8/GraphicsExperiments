@@ -50,7 +50,7 @@ const UP: Float32Array = Vec3.FromValues(0, 1, 0);
 const ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
 /* Quad mesh */
-const Quad: any = GenQuad();
+const Quad: Mesh = GenQuad();
 
 /* Vertex buffer to hold vertex data */
 const VertexBuffer: WebGLBuffer | null = GL.createBuffer();
@@ -165,7 +165,7 @@ function Init()
 
             GL.enableVertexAttribArray(VertexPosition);
 
-            GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
+            GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 

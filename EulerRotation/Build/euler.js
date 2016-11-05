@@ -1,3 +1,5 @@
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
@@ -99,7 +101,7 @@ function Init() {
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
     var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
     GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, Quad.VertexSize, GL.FLOAT, false, 0, 0);
+    GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.useProgram(null);
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);

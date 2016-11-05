@@ -58,22 +58,46 @@ const Axis_Z: Float32Array = Vec3.FromValues(0, 0, 1);
 const ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
 /* Cube mesh */
-const Cube: any = GenCube();
+const Cube: Mesh = GenCube();
 
 /* Colors */
 const CubeColors: Float32Array = new Float32Array(
     [
         // Front face
-        1.0, 0.5, 0.25,
-        1.0, 0.5, 0.25, 
-        1.0, 0.5, 0.25, 
-        1.0, 0.5, 0.25, 
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
 
         // Back face
-        0.5, 1.0, 0.25, 
-        0.5, 1.0, 0.25, 
-        0.5, 1.0, 0.25, 
-        0.5, 1.0, 0.25
+        0.0, 0.0, 1.0, 
+        0.0, 0.0, 1.0, 
+        0.0, 0.0, 1.0, 
+        0.0, 0.0, 1.0, 
+
+        // Top face 
+        0.0, 1.0, 0.0, 
+        0.0, 1.0, 0.0, 
+        0.0, 1.0, 0.0, 
+        0.0, 1.0, 0.0, 
+
+        // Bottom face 
+        1.0, 1.0, 0.0, 
+        1.0, 1.0, 0.0, 
+        1.0, 1.0, 0.0, 
+        1.0, 1.0, 0.0, 
+
+        // Right face 
+        0.0, 1.0, 1.0, 
+        0.0, 1.0, 1.0, 
+        0.0, 1.0, 1.0, 
+        0.0, 1.0, 1.0, 
+
+        // Left face
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 1.0
     ]);
 
 /* Vertex buffer to hold vertex data */
@@ -220,7 +244,7 @@ function Init()
 
             GL.enableVertexAttribArray(VertexPosition);
 
-            GL.vertexAttribPointer(VertexPosition, Cube.VertexSize, GL.FLOAT, false, 0, 0);
+            GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
 
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
 

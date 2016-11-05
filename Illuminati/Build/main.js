@@ -1,3 +1,4 @@
+/// <reference path="../../Util/Util.d.ts" />
 "use strict";
 /**
  * Main function

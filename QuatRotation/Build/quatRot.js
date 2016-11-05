@@ -1,3 +1,5 @@
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
@@ -41,15 +43,35 @@ var Cube = GenCube();
 /* Colors */
 var CubeColors = new Float32Array([
     // Front face
-    1.0, 0.5, 0.25,
-    1.0, 0.5, 0.25,
-    1.0, 0.5, 0.25,
-    1.0, 0.5, 0.25,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
     // Back face
-    0.5, 1.0, 0.25,
-    0.5, 1.0, 0.25,
-    0.5, 1.0, 0.25,
-    0.5, 1.0, 0.25
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    // Top face 
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    // Bottom face 
+    1.0, 1.0, 0.0,
+    1.0, 1.0, 0.0,
+    1.0, 1.0, 0.0,
+    1.0, 1.0, 0.0,
+    // Right face 
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    // Left face
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0
 ]);
 /* Vertex buffer to hold vertex data */
 var VertexBuffer = GL.createBuffer();
@@ -138,7 +160,7 @@ function Init() {
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
     var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
     GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, Cube.VertexSize, GL.FLOAT, false, 0, 0);
+    GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
     var ColorPosition = GL.getAttribLocation(ShaderProgram, "aColor");

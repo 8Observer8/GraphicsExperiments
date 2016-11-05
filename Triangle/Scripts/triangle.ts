@@ -59,7 +59,7 @@ function Init()
 
     let ShaderProgram: WebGLProgram | null = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
 
-    const Triangle: any = GenTriangle();
+    const Triangle: Mesh = GenTriangle();
 
     let VertexBuffer: WebGLBuffer | null = GL.createBuffer();
 
@@ -85,7 +85,7 @@ function Init()
 
     GL.enableVertexAttribArray(VertexPosition);
 
-    GL.vertexAttribPointer(VertexPosition, Triangle.VertexSize, GL.FLOAT, false, 0, 0);
+    GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
 
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
