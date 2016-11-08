@@ -149,6 +149,34 @@ abstract class Quat
     }
 
     /**
+     * Rotates the given vector with a quaternion 
+     * 
+     * @param ResultVec {Float32Array}: result rotated vector 
+     * @param QuatToMultiplyWith {Float32Array}: given quaternion rotation 
+     * @param GivenVec {Float32Array}: given vector to rotate 
+     * @returns {void}
+     */
+    public static MultiplyWithVector(ResultVec: Float32Array, QuatToMultiplyWith: Float32Array, GivenVec: Float32Array): void 
+    {
+        const A0: number = QuatToMultiplyWith[0] * 2.0;
+        const A1: number = QuatToMultiplyWith[1] * 2.0;
+        const A2: number = QuatToMultiplyWith[2] * 2.0;
+        const A3: number = QuatToMultiplyWith[0] * A0;
+        const A4: number = QuatToMultiplyWith[1] * A1;
+        const A5: number = QuatToMultiplyWith[2] * A2;
+        const A6: number = QuatToMultiplyWith[0] * A1;
+        const A7: number = QuatToMultiplyWith[0] * A2;
+        const A8: number = QuatToMultiplyWith[1] * A2;
+        const A9: number = QuatToMultiplyWith[3] * A0;
+        const A10: number = QuatToMultiplyWith[3] * A1;
+        const A11: number = QuatToMultiplyWith[3] * A2;
+
+        ResultVec[0] = (1.0 - (A4 + A5)) * GivenVec[0] + (A6 - A11) * GivenVec[1] + (A7 + A10) * GivenVec[2];
+        ResultVec[1] = (A6 + A11) * GivenVec[0] + (1.0 - (A3 + A5)) * GivenVec[1] + (A8 - A9) * GivenVec[2];
+        ResultVec[2] = (A7 - A10) * GivenVec[0] + (A8 + A9) * GivenVec[1] + (1.0 - (A3 + A4)) * GivenVec[2];
+    }
+
+    /**
      * Returns the string representation of the given quat 
      * 
      * @param GivenQuat {Float32Array}: given quat 

@@ -1056,6 +1056,44 @@ var Mat3 = (function () {
         MatToTranspose[6] = M02;
         MatToTranspose[7] = M12;
     };
+    /**
+     * Creates 3X3 normal matrix from given 4X4 model matrix
+     *
+     * @param NormalMat {Float32Array}: result normal matrix
+     * @param GivenModelMat {Float32Array}: given normal matrix
+     * @returns {void}
+     */
+    Mat3.CreateNormalMat = function (NormalMat, GivenModelMat) {
+        var A00 = GivenModelMat[0], A01 = GivenModelMat[1], A02 = GivenModelMat[2], A03 = GivenModelMat[3];
+        var A10 = GivenModelMat[4], A11 = GivenModelMat[5], A12 = GivenModelMat[6], A13 = GivenModelMat[7];
+        var A20 = GivenModelMat[8], A21 = GivenModelMat[9], A22 = GivenModelMat[10], A23 = GivenModelMat[11];
+        var A30 = GivenModelMat[12], A31 = GivenModelMat[13], A32 = GivenModelMat[14], A33 = GivenModelMat[15];
+        var B00 = A00 * A11 - A01 * A10;
+        var B01 = A00 * A12 - A02 * A10;
+        var B02 = A00 * A13 - A03 * A10;
+        var B03 = A01 * A12 - A02 * A11;
+        var B04 = A01 * A13 - A03 * A11;
+        var B05 = A02 * A13 - A03 * A12;
+        var B06 = A20 * A31 - A21 * A30;
+        var B07 = A20 * A32 - A22 * A30;
+        var B08 = A20 * A33 - A23 * A30;
+        var B09 = A21 * A32 - A22 * A31;
+        var B10 = A21 * A33 - A23 * A31;
+        var B11 = A22 * A33 - A23 * A32;
+        var Determinant = B00 * B11 - B01 * B10 + B02 * B09 + B03 * B08 - B04 * B07 + B05 * B06;
+        if (Determinant) {
+            Determinant = 1.0 / Determinant;
+            NormalMat[0] = (A11 * B11 - A12 * B10 + A13 * B09) * Determinant;
+            NormalMat[1] = (A12 * B08 - A10 * B11 - A13 * B07) * Determinant;
+            NormalMat[2] = (A10 * B10 - A11 * B08 + A13 * B06) * Determinant;
+            NormalMat[3] = (A02 * B10 - A01 * B11 - A03 * B09) * Determinant;
+            NormalMat[4] = (A00 * B11 - A02 * B08 + A03 * B07) * Determinant;
+            NormalMat[5] = (A01 * B08 - A00 * B10 - A03 * B06) * Determinant;
+            NormalMat[6] = (A31 * B05 - A32 * B04 + A33 * B03) * Determinant;
+            NormalMat[7] = (A32 * B02 - A30 * B05 - A33 * B01) * Determinant;
+            NormalMat[8] = (A30 * B04 - A31 * B02 + A33 * B00) * Determinant;
+        }
+    };
     return Mat3;
 }());
 /*
@@ -1608,6 +1646,31 @@ var Quat = (function () {
             OutQuat[2] = QuatToNormalize[2] * SquaredLength;
             OutQuat[3] = QuatToNormalize[3] * SquaredLength;
         }
+    };
+    /**
+     * Rotates the given vector with a quaternion
+     *
+     * @param ResultVec {Float32Array}: result rotated vector
+     * @param QuatToMultiplyWith {Float32Array}: given quaternion rotation
+     * @param GivenVec {Float32Array}: given vector to rotate
+     * @returns {void}
+     */
+    Quat.MultiplyWithVector = function (ResultVec, QuatToMultiplyWith, GivenVec) {
+        var A0 = QuatToMultiplyWith[0] * 2.0;
+        var A1 = QuatToMultiplyWith[1] * 2.0;
+        var A2 = QuatToMultiplyWith[2] * 2.0;
+        var A3 = QuatToMultiplyWith[0] * A0;
+        var A4 = QuatToMultiplyWith[1] * A1;
+        var A5 = QuatToMultiplyWith[2] * A2;
+        var A6 = QuatToMultiplyWith[0] * A1;
+        var A7 = QuatToMultiplyWith[0] * A2;
+        var A8 = QuatToMultiplyWith[1] * A2;
+        var A9 = QuatToMultiplyWith[3] * A0;
+        var A10 = QuatToMultiplyWith[3] * A1;
+        var A11 = QuatToMultiplyWith[3] * A2;
+        ResultVec[0] = (1.0 - (A4 + A5)) * GivenVec[0] + (A6 - A11) * GivenVec[1] + (A7 + A10) * GivenVec[2];
+        ResultVec[1] = (A6 + A11) * GivenVec[0] + (1.0 - (A3 + A5)) * GivenVec[1] + (A8 - A9) * GivenVec[2];
+        ResultVec[2] = (A7 - A10) * GivenVec[0] + (A8 + A9) * GivenVec[1] + (1.0 - (A3 + A4)) * GivenVec[2];
     };
     /**
      * Returns the string representation of the given quat

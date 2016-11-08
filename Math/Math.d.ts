@@ -85,6 +85,7 @@ declare abstract class Mat3
     public static Transpose(OutMat: Float32Array, MatToTranspose: Float32Array): void;
     public static TransposeItself(MatToTranspose: Float32Array): void;
     public static FromRotationTranslationScale(OutMat: Float32Array, TranslationVector: Float32Array, RotationZ: number, ScalingVector: Float32Array): void;
+    public static CreateNormalMat(NormalMat: Float32Array, GivenModelMat: Float32Array): void;
 }
 declare abstract class Mat4 
 {
@@ -114,4 +115,5 @@ declare abstract class Quat
     public static Multiply(OutQuat: Float32Array, FirstQuat: Float32Array, SecondQuat: Float32Array): void;
     public static Normalize(OutQuat: Float32Array, QuatToNormalize: Float32Array): void;
     public static ToString(GivenQuat: Float32Array): string;
+    public static MultiplyWithVector(ResultVec: Float32Array, QuatToMultiplyWith: Float32Array, GivenVec: Float32Array): void;
 }

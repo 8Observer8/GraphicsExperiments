@@ -254,4 +254,49 @@ abstract class Mat3
         MatToTranspose[6] = M02;
         MatToTranspose[7] = M12;
     }
+
+    /**
+     * Creates 3X3 normal matrix from given 4X4 model matrix 
+     * 
+     * @param NormalMat {Float32Array}: result normal matrix 
+     * @param GivenModelMat {Float32Array}: given normal matrix
+     * @returns {void}
+     */
+    public static CreateNormalMat(NormalMat: Float32Array, GivenModelMat: Float32Array): void 
+    {
+        const A00: number = GivenModelMat[0], A01: number = GivenModelMat[1], A02: number = GivenModelMat[2], A03: number = GivenModelMat[3];
+        const A10: number = GivenModelMat[4], A11: number = GivenModelMat[5], A12: number = GivenModelMat[6], A13: number = GivenModelMat[7];
+        const A20: number = GivenModelMat[8], A21: number = GivenModelMat[9], A22: number = GivenModelMat[10], A23: number = GivenModelMat[11];
+        const A30: number = GivenModelMat[12], A31: number = GivenModelMat[13], A32: number = GivenModelMat[14], A33: number = GivenModelMat[15];
+
+        const B00: number = A00 * A11 - A01 * A10;
+        const B01: number = A00 * A12 - A02 * A10;
+        const B02: number = A00 * A13 - A03 * A10;
+        const B03: number = A01 * A12 - A02 * A11;
+        const B04: number = A01 * A13 - A03 * A11;
+        const B05: number = A02 * A13 - A03 * A12;
+        const B06: number = A20 * A31 - A21 * A30;
+        const B07: number = A20 * A32 - A22 * A30;
+        const B08: number = A20 * A33 - A23 * A30;
+        const B09: number = A21 * A32 - A22 * A31;
+        const B10: number = A21 * A33 - A23 * A31;
+        const B11: number = A22 * A33 - A23 * A32;
+
+        let Determinant: number = B00 * B11 - B01 * B10 + B02 * B09 + B03 * B08 - B04 * B07 + B05 * B06;
+
+        if(Determinant)
+        {
+            Determinant = 1.0 / Determinant;
+
+            NormalMat[0] = (A11 * B11 - A12 * B10 + A13 * B09) * Determinant;
+            NormalMat[1] = (A12 * B08 - A10 * B11 - A13 * B07) * Determinant;
+            NormalMat[2] = (A10 * B10 - A11 * B08 + A13 * B06) * Determinant;
+            NormalMat[3] = (A02 * B10 - A01 * B11 - A03 * B09) * Determinant;
+            NormalMat[4] = (A00 * B11 - A02 * B08 + A03 * B07) * Determinant;
+            NormalMat[5] = (A01 * B08 - A00 * B10 - A03 * B06) * Determinant;
+            NormalMat[6] = (A31 * B05 - A32 * B04 + A33 * B03) * Determinant;
+            NormalMat[7] = (A32 * B02 - A30 * B05 - A33 * B01) * Determinant;
+            NormalMat[8] = (A30 * B04 - A31 * B02 + A33 * B00) * Determinant;
+        }
+    }
 }
