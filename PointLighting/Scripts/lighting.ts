@@ -51,7 +51,8 @@ const FragmentShaderSource: string = "#version 100\n" +
                                      "vec3 AmbientColor = CubeAmbientColor * PointLightAmbientColor;\n" +
                                      "vec3 DiffuseColor = DiffuseAmount * CubeDiffuseColor * PointLightDiffuseColor;\n" +
                                      "vec3 SpecularColor = SpecularAmount * CubeSpecularColor * PointLightSpecularColor;\n" +
-                                     "vec3 FinalColor = Attenuation * (AmbientColor + DiffuseColor + SpecularColor);\n" +
+                                     "vec3 FinalColor = Attenuation * (DiffuseColor + SpecularColor);\n" +
+                                     "FinalColor += AmbientColor;\n" +
                                      "gl_FragColor = vec4(FinalColor, 1.0) * texture2D(uWoodTexture, vec2(vTexCoords.s * 2.0, vTexCoords.t * 2.0));\n" +
                                      "}\n";
 
