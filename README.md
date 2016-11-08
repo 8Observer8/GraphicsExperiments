@@ -11,5 +11,6 @@ This repository contains some math + graphics stuff I do in my free time
 * Test 5: [Illuminati (Texture mapping)](https://omarhuseynov011.github.io/GraphicsExperiments/Illuminati/)
 * Test 6: [FPS Camera (Lerping)](https://omarhuseynov011.github.io/GraphicsExperiments/FPSCamera/)
 * Test 7: [Directional Light](https://omarhuseynov011.github.io/GraphicsExperiments/Lighting/)
+* Test 8: [Point Light](https://omarhuseynov011.github.io/GraphicsExperiments/PointLighting/)
 
 Note: Press _CTRL + ENTER_ to apply the changes
