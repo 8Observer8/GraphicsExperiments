@@ -101,7 +101,7 @@ const CameraFOV: number = 75.0 * TO_RADIAN;
 const CAMERA_TRANSLATION_SPEED: number = 0.01;
 
 /* Speed of the camera rotation */
-const CAMERA_ROTATION_SPEED: number = 0.0001;
+const CAMERA_ROTATION_SPEED: number = 0.01;
 
 /* Camera translation vector */
 let CameraTranslation: Float32Array = Vec3.FromValues(0, 0, 10);
@@ -114,6 +114,9 @@ let CameraRotationX: Float32Array = Quat.Create();
 
 /* Camera rotation around y axis */
 let CameraRotationY: Float32Array = Quat.Create();
+
+/* Rotation value of camera around x axis in degrees */
+let CameraRotationXInDegrees: number = 0.0 * TO_RADIAN;
 
 /* X axis of the camera */
 let CameraAxisX: Float32Array = Vec3.FromValues(1, 0, 0);
@@ -333,13 +336,38 @@ function ControlMouseMove(Event: MouseEvent): void
 {
     if(bRightClicked)
     {
-        Quat.SetFromAxisAngle(CameraRotationX, CameraAxisX, -Event.movementY * CAMERA_ROTATION_SPEED * DeltaTime);
+        CameraRotationXInDegrees += -Event.movementY * TO_RADIAN * CAMERA_ROTATION_SPEED * DeltaTime;
 
-        Quat.SetFromAxisAngle(CameraRotationY, CameraAxisY, -Event.movementX * CAMERA_ROTATION_SPEED * DeltaTime); // change second to UP
+        if(CameraRotationXInDegrees >= 85.0 * TO_RADIAN)
+        {
+            CameraRotationXInDegrees = 85.0 * TO_RADIAN;
+
+            Quat.SetIdentity(CameraRotationX);
+        }
+        else if(CameraRotationXInDegrees <= -85.0 * TO_RADIAN)
+        {
+            CameraRotationXInDegrees = -85.0 * TO_RADIAN;
+
+            Quat.SetIdentity(CameraRotationX);
+        }
+        else 
+        {
+            Quat.SetFromAxisAngle(CameraRotationX, CameraAxisX, -Event.movementY * TO_RADIAN * CAMERA_ROTATION_SPEED * DeltaTime);
+
+            Quat.Normalize(CameraRotationX, CameraRotationX);
+        }
+
+        Quat.SetFromAxisAngle(CameraRotationY, CameraAxisY, -Event.movementX * TO_RADIAN * CAMERA_ROTATION_SPEED * DeltaTime);
+
+        Quat.Normalize(CameraRotationY, CameraRotationY);
 
         Quat.Multiply(CameraOrientation, CameraRotationX, CameraRotationY);
 
+        Quat.Normalize(CameraOrientation, CameraOrientation);
+
         Quat.MultiplyWithVector(CameraAxisZ, CameraOrientation, CameraAxisZ);
+
+        Vec3.Normalize(CameraAxisZ, CameraAxisZ);
     }
 }
 
@@ -464,6 +492,8 @@ function ControlCamera(DeltaTime: number): void
 {
     Vec3.Cross(CameraAxisX, CameraAxisZ, CameraAxisY);
 
+    Vec3.Normalize(CameraAxisX, CameraAxisX);
+
     if(bW_Pressed)
     {
         Vec3.MultiplyScalar(NewTranslation, CameraAxisZ, CAMERA_TRANSLATION_SPEED * DeltaTime);
@@ -492,13 +522,13 @@ function ControlCamera(DeltaTime: number): void
 
     if(bQ_Pressed)
     {
-        Vec3.MultiplyScalar(NewTranslation, CameraAxisY, CAMERA_TRANSLATION_SPEED * DeltaTime); // change second to UP
+        Vec3.MultiplyScalar(NewTranslation, CameraAxisY, CAMERA_TRANSLATION_SPEED * DeltaTime);
 
         Vec3.Add(CameraTranslation, CameraTranslation, NewTranslation);
     }
     else if(bE_Pressed)
     {
-        Vec3.MultiplyScalar(NewTranslation, CameraAxisY, CAMERA_TRANSLATION_SPEED * DeltaTime); // change second to UP
+        Vec3.MultiplyScalar(NewTranslation, CameraAxisY, CAMERA_TRANSLATION_SPEED * DeltaTime);
 
         Vec3.Subtract(CameraTranslation, CameraTranslation, NewTranslation);
     }
@@ -509,7 +539,7 @@ function ControlCamera(DeltaTime: number): void
 
     Vec3.Add(CameraLookAt, CameraPosition, CameraAxisZ);
 
-    Mat4.CreateViewMat(CameraViewMat, CameraPosition, CameraLookAt, CameraAxisY); // change last to UP
+    Mat4.CreateViewMat(CameraViewMat, CameraPosition, CameraLookAt, CameraAxisY);
 
     Mat4.Multiply(ModelViewMat, CameraViewMat, ModelMat);
 
