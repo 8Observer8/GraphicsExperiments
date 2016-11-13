@@ -12,23 +12,22 @@ const VertexShaderSource: string = "#version 100\n" +
                                    "uniform mediump mat4 uProjection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
                                    "uniform mediump mat4 uModel;\n" +
+                                   "uniform mediump mat3 uNormalMat;\n" +
                                    "varying mediump vec3 vNormal;\n" +
                                    "varying mediump vec3 vPixelPos;\n" +
                                    "void main(void){\n" +
                                    "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
-                                   "vNormal = aNormal;\n" +
+                                   "vNormal = normalize(uNormalMat * aNormal);\n" +
                                    "vPixelPos = vec3(uModel * vec4(aPosition, 1.0));\n" +
                                    "}\n";
 
 /* Source of fragment shader */
 const FragmentShaderSource: string = "#version 100\n" +
                                      "precision mediump float;\n" +
-                                     "uniform mat3 uNormalMat;\n" +
                                      "uniform vec3 uViewPos;\n" +
                                      "varying vec3 vNormal;\n" +
                                      "varying vec3 vPixelPos;\n" +
                                      "void main(void){\n" +
-                                     "vec3 TransformedNormal = uNormalMat * vNormal;\n" +
                                      "vec3 CubeAmbientColor = vec3(1.0, 0.5, 0.25);\n" +
                                      "vec3 CubeDiffuseColor = vec3(1.0, 0.5, 0.25);\n" +
                                      "vec3 CubeSpecularColor = vec3(1.0, 0.5, 0.25);\n" +

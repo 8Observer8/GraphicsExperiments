@@ -13,7 +13,7 @@
         "removeComments": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": true,
+        "strictNullChecks": false,
         "target": "es3",
         "module": "none"
     },

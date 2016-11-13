@@ -6,47 +6,56 @@
 var VertexShaderSource = "#version 100\n" +
     "attribute mediump vec3 aPosition;\n" +
     "attribute mediump vec3 aNormal;\n" +
-    "attribute lowp vec2 aTexCoords;\n" +
+    "attribute mediump vec2 aTexCoords;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "uniform mediump mat4 uModel;\n" +
+    "uniform mat3 uNormalMat;\n" +
     "varying mediump vec3 vNormal;\n" +
     "varying mediump vec3 vPixelPos;\n" +
-    "varying lowp vec2 vTexCoords;\n" +
+    "varying mediump vec2 vTexCoords;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
-    "vNormal = aNormal;\n" +
+    "vNormal = normalize(uNormalMat * aNormal);\n" +
     "vPixelPos = vec3(uModel * vec4(aPosition, 1.0));\n" +
     "vTexCoords = aTexCoords;\n" +
     "}\n";
 /* Source of fragment shader */
 var FragmentShaderSource = "#version 100\n" +
     "precision mediump float;\n" +
-    "uniform mat3 uNormalMat;\n" +
     "uniform vec3 uViewPos;\n" +
-    "uniform vec3 uSpotLightDirection;\n" +
     "uniform sampler2D uDiffuseTexture;\n" +
     "uniform sampler2D uSpecularTexture;\n" +
+    "uniform vec3 uSpotLightDirection;\n" +
     "varying vec3 vNormal;\n" +
     "varying vec3 vPixelPos;\n" +
     "varying vec2 vTexCoords;\n" +
     "void main(void){\n" +
-    "vec3 TransformedNormal = uNormalMat * vNormal;\n" +
-    "float SpotLightCutoffAngle = cos(12.5);\n" +
-    "vec3 LightDirection = normalize(vPixelPos - uViewPos);\n" +
-    "float Theta = dot(LightDirection, uSpotLightDirection);\n" +
+    "vec3 FinalColor;\n" +
+    "vec3 LightDirection = normalize(uViewPos - vPixelPos);\n" +
     "vec3 CubeAmbientColor = vec3(1.0, 0.5, 0.25);\n" +
     "vec3 LightAmbientColor = vec3(0.1, 0.095, 0.09);\n" +
     "vec3 LightDiffuseColor = vec3(1.0, 0.95, 0.9);\n" +
     "vec3 LightSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
+    "vec3 AmbientColor = CubeAmbientColor * LightAmbientColor * vec3(texture2D(uDiffuseTexture, vTexCoords));\n" +
     "float DiffuseAmount = max(dot(vNormal, LightDirection), 0.0);\n" +
     "vec3 ViewDirection = normalize(uViewPos - vPixelPos);\n" +
     "vec3 HalfwayDirection = normalize(LightDirection + ViewDirection);\n" +
     "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 32.0);\n" +
-    "vec3 AmbientColor = CubeAmbientColor * LightAmbientColor;\n" +
+    "float Distance = length(uViewPos - vPixelPos);\n" +
+    "float Attenuation = 1.0 / (1.0 + 0.045 * Distance + 0.0075 * (Distance * Distance));\n" +
     "vec3 DiffuseColor = DiffuseAmount * vec3(texture2D(uDiffuseTexture, vTexCoords)) * LightDiffuseColor;\n" +
     "vec3 SpecularColor = SpecularAmount * vec3(texture2D(uSpecularTexture, vTexCoords)) * LightSpecularColor;\n" +
-    "vec3 FinalColor = AmbientColor + DiffuseColor + SpecularColor;\n" +
+    "DiffuseColor *= Attenuation;\n" +
+    "SpecularColor *= Attenuation;\n" +
+    "float Theta = dot(LightDirection, -uSpotLightDirection);\n" +
+    "float SpotLightOuterCutoff = cos(50.0);\n" +
+    "float SpotLightInnerCutoff = cos(25.0);\n" +
+    "float Epsilon = SpotLightInnerCutoff - SpotLightOuterCutoff;\n" +
+    "float Intensity = clamp((Theta - SpotLightOuterCutoff) / Epsilon, 0.0, 1.0);\n" +
+    "DiffuseColor *= Intensity;\n" +
+    "SpecularColor *= Intensity;\n" +
+    "FinalColor = AmbientColor + DiffuseColor + SpecularColor;\n" +
     "gl_FragColor = vec4(FinalColor, 1.0);\n" +
     "}\n";
 /**************************************************************************/
@@ -264,28 +273,36 @@ function LockChangeAlert() {
 var NewTranslation = Vec3.Create();
 /**************************************************************************/
 /********************************* TEXTURE ********************************/
-/* Image of the illuminati */
-var WoodImage;
+/* Diffuse map */
+var DiffuseImage;
+/* Specular map */
+var SpecularImage;
 /* Texture for WebGL */
-var BoxTexture;
+var DiffuseTexture;
 /* Specular texture for WebGL */
-var BoxSpecularTexture;
-/* Location of the texture */
-var BoxTextureSource = "../Assets/Textures/Box.png";
-/* Location of the specular texture */
-var BoxSpecularSource = "../Assets/Textures/BoxSpecular.png";
+var SpecularTexture;
+function ProcessDiffuseTexture() {
+    GL.bindTexture(GL.TEXTURE_2D, DiffuseTexture);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR_MIPMAP_LINEAR);
+    GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, DiffuseImage);
+    GL.generateMipmap(GL.TEXTURE_2D);
+    GL.bindTexture(GL.TEXTURE_2D, null);
+}
 /**
  * Processes the texture
  *
  * @returns {void}
  */
-function ProcessTexture(GLTexture) {
-    GL.bindTexture(GL.TEXTURE_2D, GLTexture);
+function ProcessSpecularTexture() {
+    GL.bindTexture(GL.TEXTURE_2D, SpecularTexture);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR_MIPMAP_LINEAR);
-    GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, WoodImage);
+    GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, SpecularImage);
     GL.generateMipmap(GL.TEXTURE_2D);
     GL.bindTexture(GL.TEXTURE_2D, null);
 }
@@ -294,14 +311,17 @@ function ProcessTexture(GLTexture) {
  *
  * @returns {void}
  */
-function InitTexture(TextureSource, GLTexture) {
-    GLTexture = GL.createTexture();
-    WoodImage = new Image();
-    WoodImage.onload = function () { ProcessTexture(GLTexture); };
-    WoodImage.src = TextureSource;
+function InitTexture() {
+    DiffuseTexture = GL.createTexture();
+    SpecularTexture = GL.createTexture();
+    DiffuseImage = new Image();
+    SpecularImage = new Image();
+    DiffuseImage.onload = ProcessDiffuseTexture;
+    SpecularImage.onload = ProcessSpecularTexture;
+    DiffuseImage.src = "../Assets/Textures/Box.png";
+    SpecularImage.src = "../Assets/Textures/BoxSpecular.png";
 }
-InitTexture(BoxTextureSource, BoxTexture);
-InitTexture(BoxSpecularSource, BoxSpecularTexture);
+InitTexture();
 /**************************************************************************/
 /**
  * Resizes the context
@@ -418,9 +438,9 @@ function Render() {
     GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     GL.useProgram(ShaderProgram);
     GL.activeTexture(GL.TEXTURE0);
-    GL.bindTexture(GL.TEXTURE_2D, BoxTexture);
+    GL.bindTexture(GL.TEXTURE_2D, DiffuseTexture);
     GL.activeTexture(GL.TEXTURE1);
-    GL.bindTexture(GL.TEXTURE_2D, BoxSpecularTexture);
+    GL.bindTexture(GL.TEXTURE_2D, SpecularTexture);
     GL.uniformMatrix4fv(uProjectionLocation, false, CameraProjectionMat);
     GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
     GL.uniformMatrix4fv(uModelLocation, false, ModelMat);
