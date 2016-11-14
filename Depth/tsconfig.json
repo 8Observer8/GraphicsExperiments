@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "charset": "utf-8",
+        "listFiles": true,
+        "locale": "en-us",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "outDir": "Build/",
+        "removeComments": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": false,
+        "target": "es3",
+        "module": "none"
+    },
+    "files": [
+        "Scripts/depth.ts",
+        "Scripts/main.ts"
+    ]
+}

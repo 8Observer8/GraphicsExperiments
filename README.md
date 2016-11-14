@@ -13,5 +13,6 @@ This repository contains some math + graphics stuff I do in my free time
 * Test 7: [Directional Light](https://omarhuseynov011.github.io/GraphicsExperiments/Lighting/)
 * Test 8: [Point Light](https://omarhuseynov011.github.io/GraphicsExperiments/PointLighting/)
 * Test 9: [Spot Light](https://omarhuseynov011.github.io/GraphicsExperiments/SpotLight/)
+* Test 10: [Depth Buffer Visualization](https://omarhuseynov011.github.io/GraphicsExperiments/Depth/)
 
 Note: Press _CTRL + ENTER_ to apply the changes
