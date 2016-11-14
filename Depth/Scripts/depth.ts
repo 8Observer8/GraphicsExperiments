@@ -169,23 +169,8 @@ interface ITexture
  */
 class Cube 
 {
-    /* Shading program */
-    public ShaderProgram: WebGLProgram | null;
-
-    /* Cube mesh */
-    public CubeMesh: Mesh;
-
-    /* Buffers to store data */
-    public CubeBuffer: IBuffer;
-
-    /* Necessary matrices */
-    public Matrices: IMat;
-
     /* Transform of cube */
     public Transform: ITransform;
-
-    /* Locations in the shader */
-    public Locations: ILocation;
 
     /* Diffuse texture */
     public DiffuseTexture: ITexture;
@@ -193,15 +178,43 @@ class Cube
     /* Specular texture */
     public SpecularTexture: ITexture;
 
+    /* Shading program */
+    private ShaderProgram: WebGLProgram | null;
+
+    /* Cube mesh */
+    private CubeMesh: Mesh;
+
+    /* Buffers to store data */
+    private CubeBuffer: IBuffer;
+
+    /* Necessary matrices */
+    private Matrices: IMat;
+
+    /* Locations in the shader */
+    private Locations: ILocation;
+
+    /* Source of the vertex shader */
+    private VertexShaderSource: string;
+
+    /* Source of the fragment shader */
+    private FragmentShaderSource: string;
+
     /**
      * @constructor
      * 
+     * @param VertexShaderSource {string}: source of the vertex shader 
+     * @param FragmentShaderSource {string}: source of the fragment shader
      * @param DiffuseTextureLocation {string}: Location of the diffuse texture 
      * @param SpecularTexture {string}: Location of the specular texture
      */
-    constructor(DiffuseTextureLocation: string, SpecularTextureLocation: string)
+    constructor(VertexShaderSource: string, FragmentShaderSource: string, 
+        DiffuseTextureLocation: string, SpecularTextureLocation: string)
     {
-        this.ShaderProgram = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
+        this.VertexShaderSource = VertexShaderSource;
+
+        this.FragmentShaderSource = FragmentShaderSource;
+
+        this.ShaderProgram = CompileShaders(GL, this.VertexShaderSource, this.FragmentShaderSource);
 
         this.CubeMesh = GenCube();
 
@@ -215,41 +228,36 @@ class Cube
 
         this.ProcessVertices();
 
-        this.DiffuseTexture = null;
-
-        this.SpecularTexture = null;
-
         this.DiffuseTexture = <any>{};
 
         this.SpecularTexture = <any>{};
 
-        this.DiffuseTexture.TextureSource = DiffuseTextureLocation;
+        this.InitTextures(this.DiffuseTexture, DiffuseTextureLocation);
 
-        this.SpecularTexture.TextureSource = SpecularTextureLocation;
+        this.InitTextures(this.SpecularTexture, SpecularTextureLocation);
+    }
 
-        this.DiffuseTexture.TextureGL = GL.createTexture();
+    /**
+     * Initializes the textures 
+     * 
+     * @returns {void}
+     */
+    private InitTextures(TextureToInit: ITexture, TextureLocation: string): void 
+    {
+        TextureToInit.TextureSource = TextureLocation;
 
-        this.SpecularTexture.TextureGL = GL.createTexture();
+        TextureToInit.TextureGL = GL.createTexture();
 
-        this.DiffuseTexture.TextureImage = new Image();
-
-        this.SpecularTexture.TextureImage = new Image();
+        TextureToInit.TextureImage = new Image();
 
         let CubeObject = this;
 
-        this.DiffuseTexture.TextureImage.onload = function()
+        TextureToInit.TextureImage.onload = function()
         {
-            CubeObject.ProcessTexture(CubeObject.DiffuseTexture);
+            CubeObject.ProcessTexture(TextureToInit);
         };
 
-        this.SpecularTexture.TextureImage.onload = function()
-        {
-            CubeObject.ProcessTexture(CubeObject.SpecularTexture);
-        };
-
-        CubeObject.DiffuseTexture.TextureImage.src = DiffuseTextureLocation;
-
-        CubeObject.SpecularTexture.TextureImage.src = SpecularTextureLocation;
+        TextureToInit.TextureImage.src = TextureToInit.TextureSource;
     }
 
     /**
@@ -518,9 +526,9 @@ let CameraAxisZ: Float32Array = Vec3.FromValues(0, 0, -1);
 
 let AllCubes: Array<Cube> = [];
 
-let FloorCube = new Cube("../Assets/Textures/wood_texture.jpg", "../Assets/Textures/wood_texture.jpg");
+let FloorCube = new Cube(VertexShaderSource, FragmentShaderSource, "../Assets/Textures/wood_texture.jpg", "../Assets/Textures/wood_texture.jpg");
 
-let NormalCube = new Cube("../Assets/Textures/Box.png", "../Assets/Textures/BoxSpecular.png");
+let NormalCube = new Cube(VertexShaderSource, FragmentShaderSource, "../Assets/Textures/Box.png", "../Assets/Textures/BoxSpecular.png");
 
 AllCubes.push(FloorCube);
 

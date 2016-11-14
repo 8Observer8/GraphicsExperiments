@@ -71,37 +71,41 @@ var Cube = (function () {
     /**
      * @constructor
      *
+     * @param VertexShaderSource {string}: source of the vertex shader
+     * @param FragmentShaderSource {string}: source of the fragment shader
      * @param DiffuseTextureLocation {string}: Location of the diffuse texture
      * @param SpecularTexture {string}: Location of the specular texture
      */
-    function Cube(DiffuseTextureLocation, SpecularTextureLocation) {
-        this.ShaderProgram = CompileShaders(GL, VertexShaderSource, FragmentShaderSource);
+    function Cube(VertexShaderSource, FragmentShaderSource, DiffuseTextureLocation, SpecularTextureLocation) {
+        this.VertexShaderSource = VertexShaderSource;
+        this.FragmentShaderSource = FragmentShaderSource;
+        this.ShaderProgram = CompileShaders(GL, this.VertexShaderSource, this.FragmentShaderSource);
         this.CubeMesh = GenCube();
         this.InitBuffers();
         this.InitMatrices();
         this.InitLocations();
         this.ProcessBuffers();
         this.ProcessVertices();
-        this.DiffuseTexture = null;
-        this.SpecularTexture = null;
         this.DiffuseTexture = {};
         this.SpecularTexture = {};
-        this.DiffuseTexture.TextureSource = DiffuseTextureLocation;
-        this.SpecularTexture.TextureSource = SpecularTextureLocation;
-        this.DiffuseTexture.TextureGL = GL.createTexture();
-        this.SpecularTexture.TextureGL = GL.createTexture();
-        this.DiffuseTexture.TextureImage = new Image();
-        this.SpecularTexture.TextureImage = new Image();
-        var CubeObject = this;
-        this.DiffuseTexture.TextureImage.onload = function () {
-            CubeObject.ProcessTexture(CubeObject.DiffuseTexture);
-        };
-        this.SpecularTexture.TextureImage.onload = function () {
-            CubeObject.ProcessTexture(CubeObject.SpecularTexture);
-        };
-        CubeObject.DiffuseTexture.TextureImage.src = DiffuseTextureLocation;
-        CubeObject.SpecularTexture.TextureImage.src = SpecularTextureLocation;
+        this.InitTextures(this.DiffuseTexture, DiffuseTextureLocation);
+        this.InitTextures(this.SpecularTexture, SpecularTextureLocation);
     }
+    /**
+     * Initializes the textures
+     *
+     * @returns {void}
+     */
+    Cube.prototype.InitTextures = function (TextureToInit, TextureLocation) {
+        TextureToInit.TextureSource = TextureLocation;
+        TextureToInit.TextureGL = GL.createTexture();
+        TextureToInit.TextureImage = new Image();
+        var CubeObject = this;
+        TextureToInit.TextureImage.onload = function () {
+            CubeObject.ProcessTexture(TextureToInit);
+        };
+        TextureToInit.TextureImage.src = TextureToInit.TextureSource;
+    };
     /**
      * Processes the texture
      *
@@ -265,8 +269,8 @@ var CameraAxisZ = Vec3.FromValues(0, 0, -1);
 /**************************************************************************/
 /********************************* CUBES **********************************/
 var AllCubes = [];
-var FloorCube = new Cube("../Assets/Textures/wood_texture.jpg", "../Assets/Textures/wood_texture.jpg");
-var NormalCube = new Cube("../Assets/Textures/Box.png", "../Assets/Textures/BoxSpecular.png");
+var FloorCube = new Cube(VertexShaderSource, FragmentShaderSource, "../Assets/Textures/wood_texture.jpg", "../Assets/Textures/wood_texture.jpg");
+var NormalCube = new Cube(VertexShaderSource, FragmentShaderSource, "../Assets/Textures/Box.png", "../Assets/Textures/BoxSpecular.png");
 AllCubes.push(FloorCube);
 AllCubes.push(NormalCube);
 /**************************************************************************/
