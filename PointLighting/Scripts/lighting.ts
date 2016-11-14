@@ -33,9 +33,9 @@ const FragmentShaderSource: string = "#version 100\n" +
                                      "varying vec3 vPixelPos;\n" +
                                      "varying vec2 vTexCoords;\n" +
                                      "void main(void){\n" +
-                                     "vec3 CubeAmbientColor = vec3(1.0, 0.5, 0.25);\n" +
-                                     "vec3 CubeDiffuseColor = vec3(1.0, 0.5, 0.25);\n" +
-                                     "vec3 CubeSpecularColor = vec3(1.0, 0.5, 0.25);\n" +
+                                     "vec3 CubeAmbientColor = vec3(0.5, 0.5, 0.5);\n" +
+                                     "vec3 CubeDiffuseColor = vec3(1.0, 1.0, 1.0);\n" +
+                                     "vec3 CubeSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
                                      "vec3 PointLightPosition = vec3(0, 10, 0);\n" +
                                      "vec3 PointLightDirection = normalize(PointLightPosition - vPixelPos);\n" +
                                      "vec3 PointLightAmbientColor = vec3(0.1, 0.095, 0.09);\n" +
