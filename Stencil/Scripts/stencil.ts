@@ -161,6 +161,12 @@ interface ILocation
     
     /* Location of projection matrix */
     uProjectionLocation: number;
+
+    /* Location of the diffuse texture */
+    uDiffuseTextureLocation: number;
+
+    /* Location of the specular texture */
+    uSpecularTextureLocation: number;
 }
 
 /**
@@ -351,6 +357,10 @@ class Cube
         this.Locations.uProjectionLocation = <number>GL.getUniformLocation(this.ShaderProgram, "uProjection");
 
         this.Locations.uViewPosLocation = <number>GL.getUniformLocation(this.ShaderProgram, "uViewPos");
+
+        this.Locations.uDiffuseTextureLocation = <number>GL.getUniformLocation(this.ShaderProgram, "uDiffuseTexture");
+
+        this.Locations.uSpecularTextureLocation = <number>GL.getUniformLocation(this.ShaderProgram, "uSpecularTexture");
     }
 
     /**
@@ -445,9 +455,13 @@ class Cube
 
         GL.activeTexture(GL.TEXTURE0);
 
+        GL.uniform1i(this.Locations.uDiffuseTextureLocation, 0);
+
         GL.bindTexture(GL.TEXTURE_2D, this.DiffuseTexture.TextureGL);
 
         GL.activeTexture(GL.TEXTURE1);
+
+        GL.uniform1i(this.Locations.uSpecularTextureLocation, 1);
 
         GL.bindTexture(GL.TEXTURE_2D, this.SpecularTexture.TextureGL);
 
@@ -466,6 +480,8 @@ class Cube
             GL.drawElements(GL.TRIANGLES, this.CubeMesh.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+
+        GL.activeTexture(GL.TEXTURE0);
 
         GL.bindTexture(GL.TEXTURE_2D, null);
 

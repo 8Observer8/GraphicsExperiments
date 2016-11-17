@@ -169,6 +169,8 @@ var Cube = (function () {
         this.Locations.uNormalLocation = GL.getUniformLocation(this.ShaderProgram, "uNormalMat");
         this.Locations.uProjectionLocation = GL.getUniformLocation(this.ShaderProgram, "uProjection");
         this.Locations.uViewPosLocation = GL.getUniformLocation(this.ShaderProgram, "uViewPos");
+        this.Locations.uDiffuseTextureLocation = GL.getUniformLocation(this.ShaderProgram, "uDiffuseTexture");
+        this.Locations.uSpecularTextureLocation = GL.getUniformLocation(this.ShaderProgram, "uSpecularTexture");
     };
     /**
      * Process the buffers
@@ -224,8 +226,10 @@ var Cube = (function () {
         Mat4.Multiply(this.Matrices.ModelViewMat, CameraViewMat, this.Matrices.ModelMat);
         GL.useProgram(this.ShaderProgram);
         GL.activeTexture(GL.TEXTURE0);
+        GL.uniform1i(this.Locations.uDiffuseTextureLocation, 0);
         GL.bindTexture(GL.TEXTURE_2D, this.DiffuseTexture.TextureGL);
         GL.activeTexture(GL.TEXTURE1);
+        GL.uniform1i(this.Locations.uSpecularTextureLocation, 1);
         GL.bindTexture(GL.TEXTURE_2D, this.SpecularTexture.TextureGL);
         GL.uniformMatrix4fv(this.Locations.uProjectionLocation, false, CameraProjectionMat);
         GL.uniformMatrix4fv(this.Locations.uModelViewLocation, false, this.Matrices.ModelViewMat);
@@ -235,6 +239,7 @@ var Cube = (function () {
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.CubeBuffer.IndexBuffer);
         GL.drawElements(GL.TRIANGLES, this.CubeMesh.NumOfIndices, GL.UNSIGNED_SHORT, 0);
         GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+        GL.activeTexture(GL.TEXTURE0);
         GL.bindTexture(GL.TEXTURE_2D, null);
         GL.useProgram(null);
     };

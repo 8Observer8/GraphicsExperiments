@@ -205,6 +205,10 @@ const uViewPosLocation: number = <number>GL.getUniformLocation(ShaderProgram, "u
 
 const uSpotLightDirectionLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uSpotLightDirection");
 
+const uDiffuseTextureLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uDiffuseTexture");
+
+const uSpecularTextureLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uSpecularTexture");
+
 /**************************************************************************/
 
 /********************************** INPUT *********************************/
@@ -679,9 +683,13 @@ function Render(): void
 
         GL.activeTexture(GL.TEXTURE0);
 
+        GL.uniform1i(uDiffuseTextureLocation, 0);
+
         GL.bindTexture(GL.TEXTURE_2D, DiffuseTexture);
 
         GL.activeTexture(GL.TEXTURE1);
+
+        GL.uniform1i(uSpecularTextureLocation, 1);
 
         GL.bindTexture(GL.TEXTURE_2D, SpecularTexture);
 
