@@ -9,5 +9,6 @@ declare class Mesh
 }
 declare function GenTriangle(): Mesh;
 declare function GenQuad(): Mesh;
+declare function Gen3DQuad(): Mesh;
 declare function GenCube(): Mesh;
 declare function CompileShaders(GL: WebGLRenderingContext, VertexShaderSource: string, FragmentShaderSource: string): WebGLProgram | null;

@@ -228,3 +228,29 @@ function GenCube(): Mesh
 
     return CubeMesh;
 }
+
+/**
+ * Generates a "3D" quad for use in 3D scenes 
+ * 
+ * @returns {Mesh}
+ */
+function Gen3DQuad(): Mesh
+{
+    const Vertices: Float32Array = new Float32Array([-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+
+    const Indices: Uint16Array = new Uint16Array([0, 1, 2, 2, 1, 3]);
+
+    const TextureCoordinates: Float32Array = new Float32Array(
+        [
+            0.0,  0.0,
+            1.0,  0.0,
+            0.0,  1.0,
+            1.0,  1.0
+        ]);
+
+    const Normals: Float32Array | null = null;
+
+    const Quad3DMesh: Mesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
+
+    return Quad3DMesh;
+}

@@ -142,3 +142,16 @@ function GenCube() {
     var CubeMesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
     return CubeMesh;
 }
+function Gen3DQuad() {
+    var Vertices = new Float32Array([-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+    var Indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
+    var TextureCoordinates = new Float32Array([
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0
+    ]);
+    var Normals = null;
+    var Quad3DMesh = new Mesh(Vertices, Indices, TextureCoordinates, Normals, Indices.length);
+    return Quad3DMesh;
+}
