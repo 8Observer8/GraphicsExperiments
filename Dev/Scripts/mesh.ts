@@ -82,11 +82,11 @@ function GenTriangle(): Mesh
  */
 function GenQuad(): Mesh 
 {
-    const Vertices: Float32Array = new Float32Array([-0.5, -0.5,  0.5, -0.5,  -0.5, 0.5,  0.5, 0.5]);
+    const Vertices: Float32Array = new Float32Array([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0]);
 
     const Indices: Uint16Array = new Uint16Array([0, 1, 2, 2, 1, 3]);
 
-    const TextureCoordinates: Float32Array = new Float32Array([0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]);
+    const TextureCoordinates: Float32Array = new Float32Array([0.0,  0.0, 1.0,  0.0,  0.0,  1.0, 1.0,  1.0]);
 
     const Normals: Float32Array | null = null;
 
