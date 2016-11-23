@@ -16,5 +16,6 @@ This repository contains some math + graphics stuff I do in my free time
 * Test 10: [Depth Buffer Visualization](https://omarhuseynov011.github.io/GraphicsExperiments/Depth/)
 * Test 11: [Object Outlining](https://omarhuseynov011.github.io/GraphicsExperiments/Stencil/)
 * Test 12: [Grass Rendering (Fragment discarding)](https://omarhuseynov011.github.io/GraphicsExperiments/Grass/)
+* Test 13: [Window Rendering (Alpha blending)](https://omarhuseynov011.github.io/GraphicsExperiments/Windows/)
 
 Note: Press _CTRL + ENTER_ to apply the changes
