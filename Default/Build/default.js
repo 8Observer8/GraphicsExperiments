@@ -1,11 +1,14 @@
+/// <reference path='../../Math/Math.d.ts' />
+/// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /* Canvas element */
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**
  * Resizes the context

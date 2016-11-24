@@ -1,5 +1,6 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 
 "use strict";
 
@@ -9,11 +10,11 @@ const CANVAS: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("can
 document.body.appendChild(CANVAS);
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false}) || <WebGLRenderingContext>CANVAS.getContext("experimental-webgl", {antialias: false});
+const GL: WebGL2RenderingContext = <WebGL2RenderingContext>CANVAS.getContext("webgl2", {antialias: false});
 
 if(GL === null)
 {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 
 /**

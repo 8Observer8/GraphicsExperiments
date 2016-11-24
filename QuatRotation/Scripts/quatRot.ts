@@ -1,28 +1,30 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 
 "use strict";
 
 /******************************** SHADERS *********************************/
 
 /* Source of vertex shader */
-const VertexShaderSource: string = "#version 100\n" +
-                                   "attribute mediump vec3 aPosition;\n" +
-                                   "attribute mediump vec3 aColor;\n" +
+const VertexShaderSource: string = "#version 300 es\n" +
+                                   "layout (location = 0) in highp vec3 aPosition;\n" +
+                                   "layout (location = 1) in mediump vec3 aColor;\n" +
                                    "uniform mediump mat4 uProjection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
-                                   "varying mediump vec3 vColor;\n" +
+                                   "out mediump vec3 vColor;\n" +
                                    "void main(void){\n" +
                                    "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
                                    "vColor = aColor;\n" +
                                    "}\n";
 
 /* Source of fragment shader */
-const FragmentShaderSource: string = "#version 100\n" +
-                                     "precision mediump float;\n" +
-                                     "varying vec3 vColor;\n" +
+const FragmentShaderSource: string = "#version 300 es\n" +
+                                     "precision highp float;\n" +
+                                     "in vec3 vColor;\n" +
+                                     "out vec4 Color;\n" +
                                      "void main(void){\n" +
-                                     "gl_FragColor = vec4(vColor, 1.0);\n" +
+                                     "Color = vec4(vColor, 1.0);\n" +
                                      "}\n";
 
 /**************************************************************************/
@@ -35,11 +37,11 @@ const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false}) || <WebGLRenderingContext>CANVAS.getContext("experimental-webgl", {antialias: false});
+const GL: WebGL2RenderingContext = <WebGL2RenderingContext>CANVAS.getContext("webgl2", {antialias: false});
 
 if(GL === null)
 {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 
 /**************************************************************************/
@@ -108,6 +110,9 @@ const IndexBuffer: WebGLBuffer | null = GL.createBuffer();
 
 /* Color buffer to store the color data */
 const ColorBuffer: WebGLBuffer | null = GL.createBuffer();
+
+/* VAO to store vertex state */
+const VAO: WebGLVertexArrayObject | null = GL.createVertexArray();
 
 /**************************************************************************/
 
@@ -238,25 +243,27 @@ function Init()
 
     GL.useProgram(ShaderProgram);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+        GL.bindVertexArray(VAO);
 
-            let VertexPosition: number = GL.getAttribLocation(ShaderProgram, "aPosition");
+            GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.enableVertexAttribArray(VertexPosition);
+                GL.enableVertexAttribArray(0);
 
-            GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+                GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
+            GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
 
-            let ColorPosition: number = GL.getAttribLocation(ShaderProgram, "aColor");
+                GL.enableVertexAttribArray(1);
 
-            GL.enableVertexAttribArray(ColorPosition);
+                GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
 
-            GL.vertexAttribPointer(ColorPosition, 3, GL.FLOAT, false, 0, 0);
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+            GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 
@@ -350,11 +357,11 @@ function Render(): void
 
         GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+        GL.bindVertexArray(VAO);
 
             GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 

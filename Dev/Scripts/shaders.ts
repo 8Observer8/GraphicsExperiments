@@ -15,6 +15,8 @@
 * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/// <reference path='../../Include/webgl2.d.ts' />
+
 "use strict";
 
 /**
@@ -25,7 +27,7 @@
  * @param FragmentShaderSource {string}: source of the fragment shader
  * @returns {WebGLProgram | null}
  */
-function CompileShaders(GL: WebGLRenderingContext, VertexShaderSource: string, FragmentShaderSource: string): WebGLProgram | null
+function CompileShaders(GL: WebGLRenderingContext | WebGL2RenderingContext, VertexShaderSource: string, FragmentShaderSource: string): WebGLProgram | null
 {
     const VertexShader: WebGLShader | null = GL.createShader(GL.VERTEX_SHADER);
 

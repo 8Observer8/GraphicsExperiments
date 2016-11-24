@@ -1,19 +1,20 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
-var VertexShaderSource = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute mediump vec3 aNormal;\n" +
-    "attribute lowp vec2 aTexCoords;\n" +
+var VertexShaderSource = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "layout (location = 1) in mediump vec3 aNormal;\n" +
+    "layout (location = 2) in lowp vec2 aTexCoords;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "uniform mediump mat4 uModel;\n" +
     "uniform mediump mat3 uNormalMat;\n" +
-    "varying mediump vec3 vNormal;\n" +
-    "varying mediump vec3 vPixelPos;\n" +
-    "varying lowp vec2 vTexCoords;\n" +
+    "out mediump vec3 vNormal;\n" +
+    "out mediump vec3 vPixelPos;\n" +
+    "out lowp vec2 vTexCoords;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vNormal = normalize(uNormalMat * aNormal);\n" +
@@ -21,13 +22,14 @@ var VertexShaderSource = "#version 100\n" +
     "vTexCoords = aTexCoords;\n" +
     "}\n";
 /* Source of fragment shader */
-var FragmentShaderSource = "#version 100\n" +
-    "precision mediump float;\n" +
+var FragmentShaderSource = "#version 300 es\n" +
+    "precision highp float;\n" +
     "uniform vec3 uViewPos;\n" +
     "uniform sampler2D uWoodTexture;\n" +
-    "varying vec3 vNormal;\n" +
-    "varying vec3 vPixelPos;\n" +
-    "varying vec2 vTexCoords;\n" +
+    "in vec3 vNormal;\n" +
+    "in vec3 vPixelPos;\n" +
+    "in vec2 vTexCoords;\n" +
+    "out vec4 Color;\n" +
     "void main(void){\n" +
     "vec3 CubeAmbientColor = vec3(0.5, 0.5, 0.5);\n" +
     "vec3 CubeDiffuseColor = vec3(1.0, 1.0, 1.0);\n" +
@@ -48,7 +50,7 @@ var FragmentShaderSource = "#version 100\n" +
     "vec3 SpecularColor = SpecularAmount * CubeSpecularColor * PointLightSpecularColor;\n" +
     "vec3 FinalColor = Attenuation * (DiffuseColor + SpecularColor);\n" +
     "FinalColor += AmbientColor;\n" +
-    "gl_FragColor = vec4(FinalColor, 1.0) * texture2D(uWoodTexture, vec2(vTexCoords.s * 2.0, vTexCoords.t * 2.0));\n" +
+    "Color = vec4(FinalColor, 1.0) * texture(uWoodTexture, vec2(vTexCoords.s * 2.0, vTexCoords.t * 2.0));\n" +
     "}\n";
 /**************************************************************************/
 /********************************** INIT **********************************/
@@ -56,9 +58,9 @@ var FragmentShaderSource = "#version 100\n" +
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**************************************************************************/
 /******************************** CONSTANTS *******************************/
@@ -76,6 +78,8 @@ var IndexBuffer = GL.createBuffer();
 var NormalBuffer = GL.createBuffer();
 /* Texture buffer to store texture coordinates */
 var TexBuffer = GL.createBuffer();
+/* VAO to store the vertex state */
+var VAO = GL.createVertexArray();
 /**************************************************************************/
 /*************************** ANIMATION AND ASPECT RATIO *******************/
 var bFirstTime = true;
@@ -333,21 +337,21 @@ function Init() {
     GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
     GL.useProgram(ShaderProgram);
+    GL.bindVertexArray(VAO);
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-    GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, NormalBuffer);
-    var NormalPosition = GL.getAttribLocation(ShaderProgram, "aNormal");
-    GL.enableVertexAttribArray(NormalPosition);
-    GL.vertexAttribPointer(NormalPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(1);
+    GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, TexBuffer);
-    var TexCoordPosition = GL.getAttribLocation(ShaderProgram, "aTexCoords");
-    GL.enableVertexAttribArray(TexCoordPosition);
-    GL.vertexAttribPointer(TexCoordPosition, 2, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(2);
+    GL.vertexAttribPointer(2, 2, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
     GL.enable(GL.DEPTH_TEST);
@@ -420,9 +424,9 @@ function Render() {
     GL.uniformMatrix4fv(uModelLocation, false, ModelMat);
     GL.uniformMatrix3fv(uNormalLocation, false, NormalMat);
     GL.uniform3fv(uViewPosLocation, CameraPosition);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(VAO);
     GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.bindTexture(GL.TEXTURE_2D, null);
     GL.useProgram(null);
     requestAnimationFrame(Render);

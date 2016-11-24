@@ -1,13 +1,18 @@
 /// <reference path="../../Util/Util.d.ts" />
+
 "use strict";
+
 /**
- * Main function
- *
+ * Main function 
+ * 
  * @returns {void}
  */
-function Main() {
-    var NewEditor = new Editor("Build/default.js", true);
+function Main(): void
+{
+    const NewEditor: Editor = new Editor("Build/skybox.js", true);
+
     NewEditor.Init();
 }
+
 /* Wait until the window finishes loading */
 window.onload = Main;

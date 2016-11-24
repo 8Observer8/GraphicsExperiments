@@ -1,24 +1,26 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
-var VertexShaderSource = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute mediump vec3 aColor;\n" +
+var VertexShaderSource = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "layout (location = 1) in mediump vec3 aColor;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
-    "varying mediump vec3 vColor;\n" +
+    "out mediump vec3 vColor;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vColor = aColor;\n" +
     "}\n";
 /* Source of fragment shader */
-var FragmentShaderSource = "#version 100\n" +
-    "precision mediump float;\n" +
-    "varying vec3 vColor;\n" +
+var FragmentShaderSource = "#version 300 es\n" +
+    "precision highp float;\n" +
+    "in vec3 vColor;\n" +
+    "out vec4 Color;\n" +
     "void main(void){\n" +
-    "gl_FragColor = vec4(vColor, 1.0);\n" +
+    "Color = vec4(vColor, 1.0);\n" +
     "}\n";
 /**************************************************************************/
 /********************************** INIT **********************************/
@@ -26,9 +28,9 @@ var FragmentShaderSource = "#version 100\n" +
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**************************************************************************/
 /******************************** CONSTANTS *******************************/
@@ -79,6 +81,8 @@ var VertexBuffer = GL.createBuffer();
 var IndexBuffer = GL.createBuffer();
 /* Color buffer to store the color data */
 var ColorBuffer = GL.createBuffer();
+/* VAO to store vertex state */
+var VAO = GL.createVertexArray();
 /**************************************************************************/
 /*************************** ANIMATION AND ASPECT RATIO *******************/
 var bFirstTime = true;
@@ -157,16 +161,17 @@ function Init() {
     GL.bufferData(GL.ARRAY_BUFFER, CubeColors, GL.STATIC_DRAW);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.useProgram(ShaderProgram);
+    GL.bindVertexArray(VAO);
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-    GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, ColorBuffer);
-    var ColorPosition = GL.getAttribLocation(ShaderProgram, "aColor");
-    GL.enableVertexAttribArray(ColorPosition);
-    GL.vertexAttribPointer(ColorPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(1);
+    GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
     GL.enable(GL.DEPTH_TEST);
@@ -222,9 +227,9 @@ function Render() {
     GL.useProgram(ShaderProgram);
     GL.uniformMatrix4fv(uProjectionLocation, false, CameraProjectionMat);
     GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(VAO);
     GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     requestAnimationFrame(Render);
 }

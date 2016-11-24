@@ -2,6 +2,8 @@
 
 This repository contains some math + graphics stuff I do in my free time
 
+Running demos requires a browser that supports WebGL2
+
 **Demos**
 
 * Test 1: [Default Editor](https://omarhuseynov011.github.io/GraphicsExperiments/Default/)

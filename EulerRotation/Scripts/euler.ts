@@ -1,13 +1,14 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 
 "use strict";
 
 /******************************** SHADERS *********************************/
 
 /* Source of vertex shader */
-const VertexShaderSource: string = "#version 100\n" +
-                                   "attribute mediump vec2 aPosition;\n" +
+const VertexShaderSource: string = "#version 300 es\n" +
+                                   "layout (location = 0) in highp vec2 aPosition;\n" +
                                    "uniform mediump mat4 uProjection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
                                    "void main(void){\n" +
@@ -15,10 +16,11 @@ const VertexShaderSource: string = "#version 100\n" +
                                    "}\n";
 
 /* Source of fragment shader */
-const FragmentShaderSource: string = "#version 100\n" +
-                                     "precision mediump float;\n" +
+const FragmentShaderSource: string = "#version 300 es\n" +
+                                     "precision highp float;\n" +
+                                     "out vec4 Color;\n" +
                                      "void main(void){\n" +
-                                     "gl_FragColor = vec4(1.0, 0.5, 0.25, 1.0);\n" +
+                                     "Color = vec4(1.0, 0.5, 0.25, 1.0);\n" +
                                      "}\n";
 
 /**************************************************************************/
@@ -31,7 +33,7 @@ const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false}) || <WebGLRenderingContext>CANVAS.getContext("experimental-webgl", {antialias: false});
+const GL: WebGL2RenderingContext = <WebGL2RenderingContext>CANVAS.getContext("webgl2", {antialias: false});
 
 if(GL === null)
 {
@@ -57,6 +59,9 @@ const VertexBuffer: WebGLBuffer | null = GL.createBuffer();
 
 /* Index buffer to hold index data */
 const IndexBuffer: WebGLBuffer | null = GL.createBuffer();
+
+/* VAO to store vertex state */
+const VAO: WebGLVertexArrayObject | null = GL.createVertexArray();
 
 /**************************************************************************/
 
@@ -159,15 +164,19 @@ function Init()
 
     GL.useProgram(ShaderProgram);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+        GL.bindVertexArray(VAO);
 
-            let VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
+            GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.enableVertexAttribArray(VertexPosition);
+                GL.enableVertexAttribArray(0);
 
-            GL.vertexAttribPointer(VertexPosition, 2, GL.FLOAT, false, 0, 0);
+                GL.vertexAttribPointer(0, 2, GL.FLOAT, false, 0, 0);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+            GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 
@@ -238,11 +247,11 @@ function Render(): void
 
         GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+        GL.bindVertexArray(VAO);
 
             GL.drawElements(GL.TRIANGLES, Quad.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 

@@ -1,18 +1,19 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
-var VertexShaderSource = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute lowp vec2 aTexCoords;\n" +
+var VertexShaderSource = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "layout (location = 1) in lowp vec2 aTexCoords;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "uniform mediump mat4 uModel;\n" +
     "uniform mediump mat3 uNormalMat;\n" +
-    "varying mediump vec3 vNormal;\n" +
-    "varying mediump vec3 vPixelPos;\n" +
-    "varying lowp vec2 vTexCoords;\n" +
+    "out mediump vec3 vNormal;\n" +
+    "out mediump vec3 vPixelPos;\n" +
+    "out lowp vec2 vTexCoords;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vNormal = vec3(0, 1, 0);\n" +
@@ -20,14 +21,15 @@ var VertexShaderSource = "#version 100\n" +
     "vTexCoords = aTexCoords;\n" +
     "}\n";
 /* Source of fragment shader */
-var FragmentShaderSource = "#version 100\n" +
-    "precision mediump float;\n" +
+var FragmentShaderSource = "#version 300 es\n" +
+    "precision highp float;\n" +
     "uniform vec3 uViewPos;\n" +
     "uniform sampler2D uDiffuseTexture;\n" +
     "uniform sampler2D uSpecularTexture;\n" +
-    "varying vec3 vNormal;\n" +
-    "varying vec3 vPixelPos;\n" +
-    "varying vec2 vTexCoords;\n" +
+    "in vec3 vNormal;\n" +
+    "in vec3 vPixelPos;\n" +
+    "in vec2 vTexCoords;\n" +
+    "out vec4 Color;\n" +
     "void main(void){\n" +
     "vec3 QuadAmbientColor = vec3(0.4, 0.4, 0.4);\n" +
     "vec3 QuadDiffuseColor = vec3(1.0, 1.0, 1.0);\n" +
@@ -43,24 +45,25 @@ var FragmentShaderSource = "#version 100\n" +
     "vec3 ViewDirection = normalize(uViewPos - vPixelPos);\n" +
     "vec3 HalfwayDirection = normalize(PointLightDirection + ViewDirection);\n" +
     "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 32.0);\n" +
-    "vec3 DiffuseColor = DiffuseAmount * QuadDiffuseColor * PointLightDiffuseColor * vec3(texture2D(uDiffuseTexture, vTexCoords));\n" +
-    "vec3 SpecularColor = SpecularAmount * QuadSpecularColor * PointLightSpecularColor * vec3(texture2D(uSpecularTexture, vTexCoords));\n" +
+    "vec3 DiffuseColor = DiffuseAmount * QuadDiffuseColor * PointLightDiffuseColor * vec3(texture(uDiffuseTexture, vTexCoords));\n" +
+    "vec3 SpecularColor = SpecularAmount * QuadSpecularColor * PointLightSpecularColor * vec3(texture(uSpecularTexture, vTexCoords));\n" +
     "vec3 FinalColor = Attenuation * (DiffuseColor + SpecularColor);\n" +
-    "FinalColor += QuadAmbientColor * PointLightAmbientColor * vec3(texture2D(uDiffuseTexture, vTexCoords));\n" +
-    "gl_FragColor = vec4(FinalColor, 1.0);\n" +
+    "FinalColor += QuadAmbientColor * PointLightAmbientColor * vec3(texture(uDiffuseTexture, vTexCoords));\n" +
+    "Color = vec4(FinalColor, 1.0);\n" +
     "}\n";
-var SimpleVertexShader = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute lowp vec2 aTexCoords;\n" +
-    "varying lowp vec2 vTexCoords;\n" +
+var SimpleVertexShader = "#version 300 es\n" +
+    "layout (location = 0) in mediump vec3 aPosition;\n" +
+    "layout (location = 1) in lowp vec2 aTexCoords;\n" +
+    "out lowp vec2 vTexCoords;\n" +
     "void main(void){\n" +
     "gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);\n" +
     "vTexCoords = aTexCoords;\n" +
     "}\n";
-var SimpleFragmentShader = "#version 100\n" +
-    "precision mediump float;\n" +
-    "varying vec2 vTexCoords;\n" +
+var SimpleFragmentShader = "#version 300 es\n" +
+    "precision highp float;\n" +
+    "in vec2 vTexCoords;\n" +
     "uniform sampler2D uDiffuseTexture;\n" +
+    "out vec4 EndColor;\n" +
     "void main(void){\n" +
     "const float Offset = 1.0 / 300.0;\n" +
     "vec2 AllOffsets[9];\n" +
@@ -79,14 +82,14 @@ var SimpleFragmentShader = "#version 100\n" +
     "Kernel[6] = 1.0; Kernel[7] =  1.0; Kernel[8] = 1.0; \n" +
     "vec3 SampleTex[9];\n" +
     "for(int i = 0; i < 9; i++){\n" +
-    "SampleTex[i] = vec3(texture2D(uDiffuseTexture, vTexCoords.st + AllOffsets[i]));\n" +
+    "SampleTex[i] = vec3(texture(uDiffuseTexture, vTexCoords.st + AllOffsets[i]));\n" +
     "}\n" +
     "vec3 Color = vec3(0, 0, 0);\n" +
     "for(int i = 0; i < 9; i++){\n" +
     "Color += SampleTex[i] * Kernel[i];\n" +
     "}\n" +
     "// float AverageColor = 0.2126 * Color.r + 0.7152 * Color.g + 0.0722 * Color.b;\n" +
-    "gl_FragColor = vec4(Color.r, Color.g, Color.b, 1.0);\n" +
+    "EndColor = vec4(Color.r, Color.g, Color.b, 1.0);\n" +
     "}\n";
 /**************************************************************************/
 /********************************** INIT **********************************/
@@ -94,9 +97,9 @@ var SimpleFragmentShader = "#version 100\n" +
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**************************************************************************/
 /*********************************** FBO **********************************/
@@ -104,6 +107,7 @@ var ShaderProgramForFBO = CompileShaders(GL, SimpleVertexShader, SimpleFragmentS
 var VBOForFBO = GL.createBuffer();
 var EBOForFBO = GL.createBuffer();
 var TBOForFBO = GL.createBuffer();
+var VAOForFBO = GL.createVertexArray();
 var FBO = GL.createFramebuffer();
 var RBO = GL.createRenderbuffer();
 var TextureForFBO = GL.createTexture();
@@ -184,6 +188,7 @@ var Quad = (function () {
         this.QuadBuffer.VertexBuffer = GL.createBuffer();
         this.QuadBuffer.IndexBuffer = GL.createBuffer();
         this.QuadBuffer.TexBuffer = GL.createBuffer();
+        this.VAO = GL.createVertexArray();
     };
     /**
      * Initializes the matrices
@@ -234,16 +239,17 @@ var Quad = (function () {
      */
     Quad.prototype.ProcessVertices = function () {
         GL.useProgram(this.ShaderProgram);
+        GL.bindVertexArray(this.VAO);
         GL.bindBuffer(GL.ARRAY_BUFFER, this.QuadBuffer.VertexBuffer);
-        var VertexLocation = GL.getAttribLocation(this.ShaderProgram, "aPosition");
-        GL.enableVertexAttribArray(VertexLocation);
-        GL.vertexAttribPointer(VertexLocation, 3, GL.FLOAT, false, 0, 0);
+        GL.enableVertexAttribArray(0);
+        GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
         GL.bindBuffer(GL.ARRAY_BUFFER, this.QuadBuffer.TexBuffer);
-        var TexCoordLocation = GL.getAttribLocation(this.ShaderProgram, "aTexCoords");
-        GL.enableVertexAttribArray(TexCoordLocation);
-        GL.vertexAttribPointer(TexCoordLocation, 2, GL.FLOAT, false, 0, 0);
+        GL.enableVertexAttribArray(1);
+        GL.vertexAttribPointer(1, 2, GL.FLOAT, false, 0, 0);
         GL.bindBuffer(GL.ARRAY_BUFFER, null);
+        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.QuadBuffer.IndexBuffer);
+        GL.bindVertexArray(null);
         GL.useProgram(null);
     };
     /**
@@ -267,9 +273,9 @@ var Quad = (function () {
         GL.uniformMatrix4fv(this.Locations.uProjectionLocation, false, CameraProjectionMat);
         GL.uniformMatrix4fv(this.Locations.uModelViewLocation, false, this.Matrices.ModelViewMat);
         GL.uniformMatrix4fv(this.Locations.uModelLocation, false, this.Matrices.ModelMat);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.QuadBuffer.IndexBuffer);
+        GL.bindVertexArray(this.VAO);
         GL.drawElements(GL.TRIANGLES, this.QuadMesh.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+        GL.bindVertexArray(null);
         GL.activeTexture(GL.TEXTURE0);
         GL.bindTexture(GL.TEXTURE_2D, null);
         GL.useProgram(null);
@@ -452,41 +458,40 @@ var NewTranslation = Vec3.Create();
  * @returns void
  */
 function Init() {
-    CANVAS.width = 512;
-    CANVAS.height = 512;
-    AspectRatio = 1.0;
-    GL.viewport(0, 0, 512, 512);
+    CANVAS.width = window.innerWidth;
+    CANVAS.height = window.innerHeight;
+    AspectRatio = CANVAS.width / CANVAS.height;
+    GL.viewport(0, 0, CANVAS.width, CANVAS.height);
     Floor.Transform = {};
     Floor.Transform.Position = Vec3.FromValues(0.0, 0.0, 0.0);
     Floor.Transform.Rotation = Quat.Create();
     Floor.Transform.Scaling = Vec3.FromValues(10, 10, 0.1);
     Quat.SetFromAxisAngle(Floor.Transform.Rotation, new Float32Array([1, 0, 0]), 90 * TO_RADIAN);
     GL.useProgram(ShaderProgramForFBO);
+    GL.bindVertexArray(VAOForFBO);
     GL.bindBuffer(GL.ARRAY_BUFFER, VBOForFBO);
     GL.bufferData(GL.ARRAY_BUFFER, MyQuadMesh.Vertices, GL.STATIC_DRAW);
-    var VertexLocation = GL.getAttribLocation(ShaderProgramForFBO, "aPosition");
-    GL.enableVertexAttribArray(VertexLocation);
-    GL.vertexAttribPointer(VertexLocation, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, TBOForFBO);
     GL.bufferData(GL.ARRAY_BUFFER, MyQuadMesh.TextureCoordinates, GL.STATIC_DRAW);
-    var TexCoordLocation = GL.getAttribLocation(ShaderProgramForFBO, "aTexCoords");
-    GL.enableVertexAttribArray(TexCoordLocation);
-    GL.vertexAttribPointer(TexCoordLocation, 2, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(1);
+    GL.vertexAttribPointer(1, 2, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForFBO);
     GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, MyQuadMesh.Indices, GL.STATIC_DRAW);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     GL.bindFramebuffer(GL.FRAMEBUFFER, FBO);
     GL.bindTexture(GL.TEXTURE_2D, TextureForFBO);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
     GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-    GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, 512, 512, 0, GL.RGB, GL.UNSIGNED_BYTE, null);
+    GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, CANVAS.width, CANVAS.height, 0, GL.RGB, GL.UNSIGNED_BYTE, null);
     GL.bindTexture(GL.TEXTURE_2D, null);
     GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, TextureForFBO, 0);
     GL.bindRenderbuffer(GL.RENDERBUFFER, RBO);
-    GL.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT16, 512, 512);
+    GL.renderbufferStorage(GL.RENDERBUFFER, GL.DEPTH_COMPONENT16, CANVAS.width, CANVAS.height);
     GL.bindRenderbuffer(GL.RENDERBUFFER, null);
     GL.framebufferRenderbuffer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, RBO);
     if (GL.checkFramebufferStatus(GL.FRAMEBUFFER) !== GL.FRAMEBUFFER_COMPLETE) {
@@ -562,9 +567,9 @@ function Render() {
     GL.disable(GL.DEPTH_TEST);
     GL.bindTexture(GL.TEXTURE_2D, TextureForFBO);
     GL.useProgram(ShaderProgramForFBO);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForFBO);
+    GL.bindVertexArray(VAOForFBO);
     GL.drawElements(GL.TRIANGLES, MyQuadMesh.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     requestAnimationFrame(Render);
 }

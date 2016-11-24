@@ -1,19 +1,20 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
-var VertexShaderSource = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute mediump vec3 aNormal;\n" +
-    "attribute mediump vec2 aTexCoords;\n" +
+var VertexShaderSource = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "layout (location = 1) in mediump vec3 aNormal;\n" +
+    "layout (location = 2) in mediump vec2 aTexCoords;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "uniform mediump mat4 uModel;\n" +
     "uniform mat3 uNormalMat;\n" +
-    "varying mediump vec3 vNormal;\n" +
-    "varying mediump vec3 vPixelPos;\n" +
-    "varying mediump vec2 vTexCoords;\n" +
+    "out mediump vec3 vNormal;\n" +
+    "out mediump vec3 vPixelPos;\n" +
+    "out mediump vec2 vTexCoords;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vNormal = normalize(uNormalMat * aNormal);\n" +
@@ -21,15 +22,16 @@ var VertexShaderSource = "#version 100\n" +
     "vTexCoords = aTexCoords;\n" +
     "}\n";
 /* Source of fragment shader */
-var FragmentShaderSource = "#version 100\n" +
-    "precision mediump float;\n" +
+var FragmentShaderSource = "#version 300 es\n" +
+    "precision highp float;\n" +
     "uniform vec3 uViewPos;\n" +
     "uniform sampler2D uDiffuseTexture;\n" +
     "uniform sampler2D uSpecularTexture;\n" +
     "uniform vec3 uSpotLightDirection;\n" +
-    "varying vec3 vNormal;\n" +
-    "varying vec3 vPixelPos;\n" +
-    "varying vec2 vTexCoords;\n" +
+    "in vec3 vNormal;\n" +
+    "in vec3 vPixelPos;\n" +
+    "in vec2 vTexCoords;\n" +
+    "out vec4 Color;\n" +
     "void main(void){\n" +
     "vec3 FinalColor;\n" +
     "vec3 LightDirection = normalize(uViewPos - vPixelPos);\n" +
@@ -37,15 +39,15 @@ var FragmentShaderSource = "#version 100\n" +
     "vec3 LightAmbientColor = vec3(0.1, 0.095, 0.09);\n" +
     "vec3 LightDiffuseColor = vec3(1.0, 0.95, 0.9);\n" +
     "vec3 LightSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
-    "vec3 AmbientColor = CubeAmbientColor * LightAmbientColor * vec3(texture2D(uDiffuseTexture, vTexCoords));\n" +
+    "vec3 AmbientColor = CubeAmbientColor * LightAmbientColor * vec3(texture(uDiffuseTexture, vTexCoords));\n" +
     "float DiffuseAmount = max(dot(vNormal, LightDirection), 0.0);\n" +
     "vec3 ViewDirection = normalize(uViewPos - vPixelPos);\n" +
     "vec3 HalfwayDirection = normalize(LightDirection + ViewDirection);\n" +
     "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 32.0);\n" +
     "float Distance = length(uViewPos - vPixelPos);\n" +
     "float Attenuation = 1.0 / (1.0 + 0.045 * Distance + 0.0075 * (Distance * Distance));\n" +
-    "vec3 DiffuseColor = DiffuseAmount * vec3(texture2D(uDiffuseTexture, vTexCoords)) * LightDiffuseColor;\n" +
-    "vec3 SpecularColor = SpecularAmount * vec3(texture2D(uSpecularTexture, vTexCoords)) * LightSpecularColor;\n" +
+    "vec3 DiffuseColor = DiffuseAmount * vec3(texture(uDiffuseTexture, vTexCoords)) * LightDiffuseColor;\n" +
+    "vec3 SpecularColor = SpecularAmount * vec3(texture(uSpecularTexture, vTexCoords)) * LightSpecularColor;\n" +
     "DiffuseColor *= Attenuation;\n" +
     "SpecularColor *= Attenuation;\n" +
     "float Theta = dot(LightDirection, -uSpotLightDirection);\n" +
@@ -56,7 +58,7 @@ var FragmentShaderSource = "#version 100\n" +
     "DiffuseColor *= Intensity;\n" +
     "SpecularColor *= Intensity;\n" +
     "FinalColor = AmbientColor + DiffuseColor + SpecularColor;\n" +
-    "gl_FragColor = vec4(FinalColor, 1.0);\n" +
+    "Color = vec4(FinalColor, 1.0);\n" +
     "}\n";
 /**************************************************************************/
 /********************************** INIT **********************************/
@@ -64,9 +66,9 @@ var FragmentShaderSource = "#version 100\n" +
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**************************************************************************/
 /******************************** CONSTANTS *******************************/
@@ -84,6 +86,8 @@ var IndexBuffer = GL.createBuffer();
 var NormalBuffer = GL.createBuffer();
 /* Texture buffer to hold the texture data */
 var TexBuffer = GL.createBuffer();
+/* VAO to store the vertex state */
+var VAO = GL.createVertexArray();
 /**************************************************************************/
 /*************************** ANIMATION AND ASPECT RATIO *******************/
 var bFirstTime = true;
@@ -144,6 +148,8 @@ var uNormalLocation = GL.getUniformLocation(ShaderProgram, "uNormalMat");
 var uModelLocation = GL.getUniformLocation(ShaderProgram, "uModel");
 var uViewPosLocation = GL.getUniformLocation(ShaderProgram, "uViewPos");
 var uSpotLightDirectionLocation = GL.getUniformLocation(ShaderProgram, "uSpotLightDirection");
+var uDiffuseTextureLocation = GL.getUniformLocation(ShaderProgram, "uDiffuseTexture");
+var uSpecularTextureLocation = GL.getUniformLocation(ShaderProgram, "uSpecularTexture");
 /**************************************************************************/
 /********************************** INPUT *********************************/
 var bW_Pressed;
@@ -357,21 +363,21 @@ function Init() {
     GL.bufferData(GL.ARRAY_BUFFER, Cube.TextureCoordinates, GL.STATIC_DRAW);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.useProgram(ShaderProgram);
+    GL.bindVertexArray(VAO);
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-    GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, NormalBuffer);
-    var NormalPosition = GL.getAttribLocation(ShaderProgram, "aNormal");
-    GL.enableVertexAttribArray(NormalPosition);
-    GL.vertexAttribPointer(NormalPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(1);
+    GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, TexBuffer);
-    var TextureLocation = GL.getAttribLocation(ShaderProgram, "aTexCoords");
-    GL.enableVertexAttribArray(TextureLocation);
-    GL.vertexAttribPointer(TextureLocation, 2, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(2);
+    GL.vertexAttribPointer(2, 2, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
     GL.enable(GL.DEPTH_TEST);
@@ -438,8 +444,10 @@ function Render() {
     GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     GL.useProgram(ShaderProgram);
     GL.activeTexture(GL.TEXTURE0);
+    GL.uniform1i(uDiffuseTextureLocation, 0);
     GL.bindTexture(GL.TEXTURE_2D, DiffuseTexture);
     GL.activeTexture(GL.TEXTURE1);
+    GL.uniform1i(uSpecularTextureLocation, 1);
     GL.bindTexture(GL.TEXTURE_2D, SpecularTexture);
     GL.uniformMatrix4fv(uProjectionLocation, false, CameraProjectionMat);
     GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
@@ -447,9 +455,9 @@ function Render() {
     GL.uniformMatrix3fv(uNormalLocation, false, NormalMat);
     GL.uniform3fv(uViewPosLocation, CameraPosition);
     GL.uniform3fv(uSpotLightDirectionLocation, CameraAxisZ);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(VAO);
     GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     requestAnimationFrame(Render);
 }
