@@ -1,20 +1,21 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 
 "use strict";
 
 /******************************** SHADERS *********************************/
 
 /* Source of vertex shader */
-const VertexShaderSource: string = "#version 100\n" +
-                                   "attribute mediump vec3 aPosition;\n" +
-                                   "attribute mediump vec3 aNormal;\n" +
+const VertexShaderSource: string = "#version 300 es\n" +
+                                   "layout (location = 0) in highp vec3 aPosition;\n" +
+                                   "layout (location = 1) in mediump vec3 aNormal;\n" +
                                    "uniform mediump mat4 uProjection;\n" +
                                    "uniform mediump mat4 uModelView;\n" +
                                    "uniform mediump mat4 uModel;\n" +
                                    "uniform mediump mat3 uNormalMat;\n" +
-                                   "varying mediump vec3 vNormal;\n" +
-                                   "varying mediump vec3 vPixelPos;\n" +
+                                   "out mediump vec3 vNormal;\n" +
+                                   "out mediump vec3 vPixelPos;\n" +
                                    "void main(void){\n" +
                                    "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
                                    "vNormal = normalize(uNormalMat * aNormal);\n" +
@@ -22,29 +23,52 @@ const VertexShaderSource: string = "#version 100\n" +
                                    "}\n";
 
 /* Source of fragment shader */
-const FragmentShaderSource: string = "#version 100\n" +
-                                     "precision mediump float;\n" +
+const FragmentShaderSource: string = "#version 300 es\n" +
+                                     "precision highp float;\n" +
                                      "uniform vec3 uViewPos;\n" +
-                                     "varying vec3 vNormal;\n" +
-                                     "varying vec3 vPixelPos;\n" +
+                                     "uniform samplerCube uCubeMapTexture;\n" +
+                                     "in vec3 vNormal;\n" +
+                                     "in vec3 vPixelPos;\n" +
+                                     "out vec4 Color;\n" +
                                      "void main(void){\n" +
-                                     "vec3 CubeAmbientColor = vec3(1.0, 0.5, 0.25);\n" +
-                                     "vec3 CubeDiffuseColor = vec3(1.0, 0.5, 0.25);\n" +
-                                     "vec3 CubeSpecularColor = vec3(1.0, 0.5, 0.25);\n" +
-                                     "vec3 DirectionalLightDirection = vec3(0, 0, 1);\n" +
-                                     "vec3 DirectionalLightAmbientColor = vec3(0.1, 0.095, 0.09);\n" +
-                                     "vec3 DirectionalLightDiffuseColor = vec3(1.0, 0.95, 0.9);\n" +
+                                     "vec3 CubeAmbientColor = vec3(0.5, 0.75, 1.0);\n" +
+                                     "vec3 CubeDiffuseColor = vec3(0.5, 0.75, 1.0);\n" +
+                                     "vec3 CubeSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
+                                     "vec3 DirectionalLightDirection = vec3(-0.2, 0.4, -1);\n" +
+                                     "vec3 DirectionalLightAmbientColor = vec3(0.1, 0.1, 0.1);\n" +
+                                     "vec3 DirectionalLightDiffuseColor = vec3(0.9, 0.9, 1.0);\n" +
                                      "vec3 DirectionalLightSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
                                      "float DiffuseAmount = max(dot(vNormal, DirectionalLightDirection), 0.0);\n" +
                                      "vec3 ViewDirection = normalize(uViewPos - vPixelPos);\n" +
                                      "vec3 HalfwayDirection = normalize(DirectionalLightDirection + ViewDirection);\n" +
-                                     "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 32.0);\n" +
+                                     "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 256.0);\n" +
                                      "vec3 AmbientColor = CubeAmbientColor * DirectionalLightAmbientColor;\n" +
                                      "vec3 DiffuseColor = DiffuseAmount * CubeDiffuseColor * DirectionalLightDiffuseColor;\n" +
                                      "vec3 SpecularColor = SpecularAmount * CubeSpecularColor * DirectionalLightSpecularColor;\n" +
                                      "vec3 FinalColor = AmbientColor + DiffuseColor + SpecularColor;\n" +
-                                     "gl_FragColor = vec4(FinalColor, 1.0);\n" +
+                                     "vec3 ReflectDirection = reflect(-ViewDirection, vNormal);\n" +
+                                     "Color = vec4(FinalColor * vec3(texture(uCubeMapTexture, ReflectDirection)), 1.0);\n" +
                                      "}\n";
+
+const VertexShaderSourceForCubeMap: string = "#version 300 es\n" +
+                                             "layout (location = 0) in highp vec3 aPosition;\n" +
+                                             "uniform mediump mat4 uProjection;\n" +
+                                             "uniform mediump mat4 uView;\n" +
+                                             "out highp vec3 vTexCoords;\n" +
+                                             "void main(void){\n" +
+                                             "vec4 NewPosition = uProjection * uView * vec4(aPosition, 1.0);\n" +
+                                             "gl_Position = NewPosition.xyww;\n" +
+                                             "vTexCoords = aPosition;\n" +
+                                             "}\n";
+
+const FragmentShaderSourceForCubeMap: string = "#version 300 es\n" +
+                                                "precision highp float;\n" +
+                                                "in vec3 vTexCoords;\n" +
+                                                "uniform samplerCube uCubeMapTexture;\n" +
+                                                "out vec4 Color;\n" +
+                                                "void main(void){\n" +
+                                                "Color = texture(uCubeMapTexture, vTexCoords);\n" +
+                                                "}\n";
 
 /**************************************************************************/
 
@@ -56,11 +80,11 @@ const CANVAS: HTMLCanvasElement = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 
 /* WebGL context */
-const GL: WebGLRenderingContext = <WebGLRenderingContext>CANVAS.getContext("webgl", {antialias: false}) || <WebGLRenderingContext>CANVAS.getContext("experimental-webgl", {antialias: false});
+const GL: WebGL2RenderingContext = <WebGL2RenderingContext>CANVAS.getContext("webgl2", {antialias: false});
 
 if(GL === null)
 {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 
 /**************************************************************************/
@@ -85,6 +109,9 @@ const IndexBuffer: WebGLBuffer | null = GL.createBuffer();
 
 /* Normal buffer to hold the normal data */
 const NormalBuffer: WebGLBuffer | null = GL.createBuffer();
+
+/* VAO to store the vertex state */
+const VAO: WebGLVertexArrayObject | null = GL.createVertexArray();
 
 /**************************************************************************/
 
@@ -171,6 +198,113 @@ let CubeScaling: Float32Array = Vec3.FromValues(2, 2, 2);
 
 /**************************************************************************/
 
+/******************************** CUBE-MAP ********************************/
+
+/* Texture for the cubemap */
+const CubeMapTexture: WebGLTexture | null = GL.createTexture();
+
+GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_R, GL.CLAMP_TO_EDGE);
+
+GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+
+let RightImage: HTMLImageElement = new Image();
+
+let LeftImage: HTMLImageElement = new Image();
+
+let BackImage: HTMLImageElement = new Image();
+
+let FrontImage: HTMLImageElement = new Image();
+
+let TopImage: HTMLImageElement = new Image();
+
+let BottomImage: HTMLImageElement = new Image();
+
+RightImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, RightImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+RightImage.src = "../Assets/Textures/right.jpg";
+
+LeftImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, LeftImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+LeftImage.src = "../Assets/Textures/left.jpg";
+
+BackImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, BackImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+BackImage.src = "../Assets/Textures/back.jpg";
+
+FrontImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, FrontImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+FrontImage.src = "../Assets/Textures/front.jpg";
+
+TopImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, TopImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+TopImage.src = "../Assets/Textures/top.jpg";
+
+BottomImage.onload = function()
+{
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, BottomImage);
+
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+}
+
+BottomImage.src = "../Assets/Textures/bottom.jpg";
+
+const ShaderProgramForCubeMap: WebGLProgram | null = CompileShaders(GL, VertexShaderSourceForCubeMap, FragmentShaderSourceForCubeMap);
+
+let VBOForCubeMap: WebGLBuffer | null = GL.createBuffer();
+
+let VAOForCubeMap: WebGLVertexArrayObject | null = GL.createVertexArray();
+
+let EBOForCubeMap: WebGLBuffer | null = GL.createBuffer();
+
+/**************************************************************************/
+
 /******************************** LOCATIONS *******************************/
 
 const uModelViewLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uModelView");
@@ -182,6 +316,14 @@ const uNormalLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uN
 const uModelLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uModel");
 
 const uViewPosLocation: number = <number>GL.getUniformLocation(ShaderProgram, "uViewPos");
+
+const uViewLocationInCubeMap: number = <number>GL.getUniformLocation(ShaderProgramForCubeMap, "uView");
+
+const uProjectionLocationInCubeMap: number = <number>GL.getUniformLocation(ShaderProgramForCubeMap, "uProjection");
+
+const uCubeMapTextureLocationInCubeMap: number = <number>GL.getUniformLocation(ShaderProgramForCubeMap, "uCubeMapTexture");
+
+const uCubeMapTextureLocationInCube: number = <number>GL.getUniformLocation(ShaderProgram, "uCubeMapTexture");
 
 /**************************************************************************/
 
@@ -426,33 +568,67 @@ function Init()
 
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
+    GL.bindBuffer(GL.ARRAY_BUFFER, VBOForCubeMap);
+
+        GL.bufferData(GL.ARRAY_BUFFER, Cube.Vertices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForCubeMap);
+
+        GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
+
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+
     GL.useProgram(ShaderProgram);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
+        GL.bindVertexArray(VAO);
 
-            const VertexPosition: number = GL.getAttribLocation(ShaderProgram, "aPosition");
+            GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
 
-            GL.enableVertexAttribArray(VertexPosition);
+                GL.enableVertexAttribArray(0);
 
-            GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+                GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, NormalBuffer);
+            GL.bindBuffer(GL.ARRAY_BUFFER, NormalBuffer);
 
-            const NormalPosition: number = GL.getAttribLocation(ShaderProgram, "aNormal");
+                GL.enableVertexAttribArray(1);
 
-            GL.enableVertexAttribArray(NormalPosition);
+                GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
 
-            GL.vertexAttribPointer(NormalPosition, 3, GL.FLOAT, false, 0, 0);
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
 
-        GL.bindBuffer(GL.ARRAY_BUFFER, null);
+            GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+        GL.bindVertexArray(null);
+
+    GL.useProgram(null);
+
+    GL.useProgram(ShaderProgramForCubeMap);
+
+        GL.bindVertexArray(VAOForCubeMap);
+
+            GL.bindBuffer(GL.ARRAY_BUFFER, VBOForCubeMap);
+
+                GL.enableVertexAttribArray(0);
+
+                GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
+
+            GL.bindBuffer(GL.ARRAY_BUFFER, null);
+
+            GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForCubeMap);
+
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
 
     GL.enable(GL.DEPTH_TEST);
+
+    GL.depthFunc(GL.LEQUAL);
 
     requestAnimationFrame(Render);
 }
@@ -551,6 +727,36 @@ function Render(): void
 
     GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
+    CameraViewMat[12] = 0.0;
+
+    CameraViewMat[13] = 0.0;
+
+    CameraViewMat[14] = 0.0;
+
+    GL.depthMask(false);
+
+    GL.useProgram(ShaderProgramForCubeMap);
+
+        GL.uniformMatrix4fv(uProjectionLocationInCubeMap, false, CameraProjectionMat);
+
+        GL.uniformMatrix4fv(uViewLocationInCubeMap, false, CameraViewMat);
+
+        GL.activeTexture(GL.TEXTURE0);
+
+        GL.uniform1i(uCubeMapTextureLocationInCubeMap, 0);
+
+        GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+        GL.bindVertexArray(VAOForCubeMap);
+
+            GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
+
+        GL.bindVertexArray(null);
+
+    GL.useProgram(null);
+
+    GL.depthMask(true);
+
     GL.useProgram(ShaderProgram);
 
         GL.uniformMatrix4fv(uProjectionLocation, false, CameraProjectionMat);
@@ -563,11 +769,15 @@ function Render(): void
 
         GL.uniform3fv(uViewPosLocation, CameraPosition);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+        GL.uniform1i(uCubeMapTextureLocationInCube, 0);
+
+        GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+
+        GL.bindVertexArray(VAO);
 
             GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
 
-        GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+        GL.bindVertexArray(null);
 
     GL.useProgram(null);
 

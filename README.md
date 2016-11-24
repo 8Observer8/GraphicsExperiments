@@ -20,5 +20,6 @@ Running demos requires a browser that supports WebGL2
 * Test 12: [Grass Rendering (Fragment discarding)](https://omarhuseynov011.github.io/GraphicsExperiments/Grass/)
 * Test 13: [Window Rendering (Alpha blending)](https://omarhuseynov011.github.io/GraphicsExperiments/Windows/)
 * Test 14: [Edge Detection (Post-processing using kernels)](https://omarhuseynov011.github.io/GraphicsExperiments/PostProcess/)
+* Test 15: [Reflections (Environment Mapping)](https://omarhuseynov011.github.io/GraphicsExperiments/SkyBox/)
 
 Note: Press _CTRL + ENTER_ to apply the changes

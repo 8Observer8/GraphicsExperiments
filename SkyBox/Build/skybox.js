@@ -1,45 +1,67 @@
 /// <reference path='../../Math/Math.d.ts' />
 /// <reference path='../../Dev/Dev.d.ts' />
+/// <reference path='../../Include/webgl2.d.ts' />
 "use strict";
 /******************************** SHADERS *********************************/
 /* Source of vertex shader */
-var VertexShaderSource = "#version 100\n" +
-    "attribute mediump vec3 aPosition;\n" +
-    "attribute mediump vec3 aNormal;\n" +
+var VertexShaderSource = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "layout (location = 1) in mediump vec3 aNormal;\n" +
     "uniform mediump mat4 uProjection;\n" +
     "uniform mediump mat4 uModelView;\n" +
     "uniform mediump mat4 uModel;\n" +
     "uniform mediump mat3 uNormalMat;\n" +
-    "varying mediump vec3 vNormal;\n" +
-    "varying mediump vec3 vPixelPos;\n" +
+    "out mediump vec3 vNormal;\n" +
+    "out mediump vec3 vPixelPos;\n" +
     "void main(void){\n" +
     "gl_Position = uProjection * uModelView * vec4(aPosition, 1);\n" +
     "vNormal = normalize(uNormalMat * aNormal);\n" +
     "vPixelPos = vec3(uModel * vec4(aPosition, 1.0));\n" +
     "}\n";
 /* Source of fragment shader */
-var FragmentShaderSource = "#version 100\n" +
-    "precision mediump float;\n" +
+var FragmentShaderSource = "#version 300 es\n" +
+    "precision highp float;\n" +
     "uniform vec3 uViewPos;\n" +
-    "varying vec3 vNormal;\n" +
-    "varying vec3 vPixelPos;\n" +
+    "uniform samplerCube uCubeMapTexture;\n" +
+    "in vec3 vNormal;\n" +
+    "in vec3 vPixelPos;\n" +
+    "out vec4 Color;\n" +
     "void main(void){\n" +
-    "vec3 CubeAmbientColor = vec3(1.0, 0.5, 0.25);\n" +
-    "vec3 CubeDiffuseColor = vec3(1.0, 0.5, 0.25);\n" +
-    "vec3 CubeSpecularColor = vec3(1.0, 0.5, 0.25);\n" +
-    "vec3 DirectionalLightDirection = vec3(0, 0, 1);\n" +
-    "vec3 DirectionalLightAmbientColor = vec3(0.1, 0.095, 0.09);\n" +
-    "vec3 DirectionalLightDiffuseColor = vec3(1.0, 0.95, 0.9);\n" +
+    "vec3 CubeAmbientColor = vec3(0.5, 0.75, 1.0);\n" +
+    "vec3 CubeDiffuseColor = vec3(0.5, 0.75, 1.0);\n" +
+    "vec3 CubeSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
+    "vec3 DirectionalLightDirection = vec3(-0.2, 0.4, -1);\n" +
+    "vec3 DirectionalLightAmbientColor = vec3(0.1, 0.1, 0.1);\n" +
+    "vec3 DirectionalLightDiffuseColor = vec3(0.9, 0.9, 1.0);\n" +
     "vec3 DirectionalLightSpecularColor = vec3(1.0, 1.0, 1.0);\n" +
     "float DiffuseAmount = max(dot(vNormal, DirectionalLightDirection), 0.0);\n" +
     "vec3 ViewDirection = normalize(uViewPos - vPixelPos);\n" +
     "vec3 HalfwayDirection = normalize(DirectionalLightDirection + ViewDirection);\n" +
-    "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 32.0);\n" +
+    "float SpecularAmount = pow(max(dot(vNormal, HalfwayDirection), 0.0), 256.0);\n" +
     "vec3 AmbientColor = CubeAmbientColor * DirectionalLightAmbientColor;\n" +
     "vec3 DiffuseColor = DiffuseAmount * CubeDiffuseColor * DirectionalLightDiffuseColor;\n" +
     "vec3 SpecularColor = SpecularAmount * CubeSpecularColor * DirectionalLightSpecularColor;\n" +
     "vec3 FinalColor = AmbientColor + DiffuseColor + SpecularColor;\n" +
-    "gl_FragColor = vec4(FinalColor, 1.0);\n" +
+    "vec3 ReflectDirection = reflect(-ViewDirection, vNormal);\n" +
+    "Color = vec4(FinalColor * vec3(texture(uCubeMapTexture, ReflectDirection)), 1.0);\n" +
+    "}\n";
+var VertexShaderSourceForCubeMap = "#version 300 es\n" +
+    "layout (location = 0) in highp vec3 aPosition;\n" +
+    "uniform mediump mat4 uProjection;\n" +
+    "uniform mediump mat4 uView;\n" +
+    "out highp vec3 vTexCoords;\n" +
+    "void main(void){\n" +
+    "vec4 NewPosition = uProjection * uView * vec4(aPosition, 1.0);\n" +
+    "gl_Position = NewPosition.xyww;\n" +
+    "vTexCoords = aPosition;\n" +
+    "}\n";
+var FragmentShaderSourceForCubeMap = "#version 300 es\n" +
+    "precision highp float;\n" +
+    "in vec3 vTexCoords;\n" +
+    "uniform samplerCube uCubeMapTexture;\n" +
+    "out vec4 Color;\n" +
+    "void main(void){\n" +
+    "Color = texture(uCubeMapTexture, vTexCoords);\n" +
     "}\n";
 /**************************************************************************/
 /********************************** INIT **********************************/
@@ -47,9 +69,9 @@ var FragmentShaderSource = "#version 100\n" +
 var CANVAS = document.createElement("canvas");
 document.body.appendChild(CANVAS);
 /* WebGL context */
-var GL = CANVAS.getContext("webgl", { antialias: false }) || CANVAS.getContext("experimental-webgl", { antialias: false });
+var GL = CANVAS.getContext("webgl2", { antialias: false });
 if (GL === null) {
-    throw new Error("WebGL is not supported");
+    throw new Error("WebGL2 is not supported");
 }
 /**************************************************************************/
 /******************************** CONSTANTS *******************************/
@@ -65,6 +87,8 @@ var VertexBuffer = GL.createBuffer();
 var IndexBuffer = GL.createBuffer();
 /* Normal buffer to hold the normal data */
 var NormalBuffer = GL.createBuffer();
+/* VAO to store the vertex state */
+var VAO = GL.createVertexArray();
 /**************************************************************************/
 /*************************** ANIMATION AND ASPECT RATIO *******************/
 var bFirstTime = true;
@@ -118,12 +142,73 @@ var CubeRotation = Quat.Create();
 /* Scaling vector of the cube */
 var CubeScaling = Vec3.FromValues(2, 2, 2);
 /**************************************************************************/
+/******************************** CUBE-MAP ********************************/
+/* Texture for the cubemap */
+var CubeMapTexture = GL.createTexture();
+GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_R, GL.CLAMP_TO_EDGE);
+GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+var RightImage = new Image();
+var LeftImage = new Image();
+var BackImage = new Image();
+var FrontImage = new Image();
+var TopImage = new Image();
+var BottomImage = new Image();
+RightImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, RightImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+RightImage.src = "../Assets/Textures/right.jpg";
+LeftImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, LeftImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+LeftImage.src = "../Assets/Textures/left.jpg";
+BackImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, BackImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+BackImage.src = "../Assets/Textures/back.jpg";
+FrontImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, FrontImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+FrontImage.src = "../Assets/Textures/front.jpg";
+TopImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, TopImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+TopImage.src = "../Assets/Textures/top.jpg";
+BottomImage.onload = function () {
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.texImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, BottomImage);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, null);
+};
+BottomImage.src = "../Assets/Textures/bottom.jpg";
+var ShaderProgramForCubeMap = CompileShaders(GL, VertexShaderSourceForCubeMap, FragmentShaderSourceForCubeMap);
+var VBOForCubeMap = GL.createBuffer();
+var VAOForCubeMap = GL.createVertexArray();
+var EBOForCubeMap = GL.createBuffer();
+/**************************************************************************/
 /******************************** LOCATIONS *******************************/
 var uModelViewLocation = GL.getUniformLocation(ShaderProgram, "uModelView");
 var uProjectionLocation = GL.getUniformLocation(ShaderProgram, "uProjection");
 var uNormalLocation = GL.getUniformLocation(ShaderProgram, "uNormalMat");
 var uModelLocation = GL.getUniformLocation(ShaderProgram, "uModel");
 var uViewPosLocation = GL.getUniformLocation(ShaderProgram, "uViewPos");
+var uViewLocationInCubeMap = GL.getUniformLocation(ShaderProgramForCubeMap, "uView");
+var uProjectionLocationInCubeMap = GL.getUniformLocation(ShaderProgramForCubeMap, "uProjection");
+var uCubeMapTextureLocationInCubeMap = GL.getUniformLocation(ShaderProgramForCubeMap, "uCubeMapTexture");
+var uCubeMapTextureLocationInCube = GL.getUniformLocation(ShaderProgram, "uCubeMapTexture");
 /**************************************************************************/
 /********************************** INPUT *********************************/
 var bW_Pressed;
@@ -282,20 +367,37 @@ function Init() {
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
     GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ARRAY_BUFFER, VBOForCubeMap);
+    GL.bufferData(GL.ARRAY_BUFFER, Cube.Vertices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForCubeMap);
+    GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, Cube.Indices, GL.STATIC_DRAW);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
     GL.useProgram(ShaderProgram);
+    GL.bindVertexArray(VAO);
     GL.bindBuffer(GL.ARRAY_BUFFER, VertexBuffer);
-    var VertexPosition = GL.getAttribLocation(ShaderProgram, "aPosition");
-    GL.enableVertexAttribArray(VertexPosition);
-    GL.vertexAttribPointer(VertexPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
     GL.bindBuffer(GL.ARRAY_BUFFER, NormalBuffer);
-    var NormalPosition = GL.getAttribLocation(ShaderProgram, "aNormal");
-    GL.enableVertexAttribArray(NormalPosition);
-    GL.vertexAttribPointer(NormalPosition, 3, GL.FLOAT, false, 0, 0);
+    GL.enableVertexAttribArray(1);
+    GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 0, 0);
     GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.bindVertexArray(null);
+    GL.useProgram(null);
+    GL.useProgram(ShaderProgramForCubeMap);
+    GL.bindVertexArray(VAOForCubeMap);
+    GL.bindBuffer(GL.ARRAY_BUFFER, VBOForCubeMap);
+    GL.enableVertexAttribArray(0);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 0, 0);
+    GL.bindBuffer(GL.ARRAY_BUFFER, null);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBOForCubeMap);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
     GL.enable(GL.DEPTH_TEST);
+    GL.depthFunc(GL.LEQUAL);
     requestAnimationFrame(Render);
 }
 /**
@@ -357,15 +459,32 @@ function Render() {
     }
     GL.clearColor(0.25, 0.25, 0.35, 1.0);
     GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+    CameraViewMat[12] = 0.0;
+    CameraViewMat[13] = 0.0;
+    CameraViewMat[14] = 0.0;
+    GL.depthMask(false);
+    GL.useProgram(ShaderProgramForCubeMap);
+    GL.uniformMatrix4fv(uProjectionLocationInCubeMap, false, CameraProjectionMat);
+    GL.uniformMatrix4fv(uViewLocationInCubeMap, false, CameraViewMat);
+    GL.activeTexture(GL.TEXTURE0);
+    GL.uniform1i(uCubeMapTextureLocationInCubeMap, 0);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.bindVertexArray(VAOForCubeMap);
+    GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
+    GL.bindVertexArray(null);
+    GL.useProgram(null);
+    GL.depthMask(true);
     GL.useProgram(ShaderProgram);
     GL.uniformMatrix4fv(uProjectionLocation, false, CameraProjectionMat);
     GL.uniformMatrix4fv(uModelViewLocation, false, ModelViewMat);
     GL.uniformMatrix4fv(uModelLocation, false, ModelMat);
     GL.uniformMatrix3fv(uNormalLocation, false, NormalMat);
     GL.uniform3fv(uViewPosLocation, CameraPosition);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    GL.uniform1i(uCubeMapTextureLocationInCube, 0);
+    GL.bindTexture(GL.TEXTURE_CUBE_MAP, CubeMapTexture);
+    GL.bindVertexArray(VAO);
     GL.drawElements(GL.TRIANGLES, Cube.NumOfIndices, GL.UNSIGNED_SHORT, 0);
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
+    GL.bindVertexArray(null);
     GL.useProgram(null);
     requestAnimationFrame(Render);
 }
