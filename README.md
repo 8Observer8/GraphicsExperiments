@@ -21,5 +21,6 @@ Running demos requires a browser that supports WebGL2
 * Test 13: [Window Rendering (Alpha blending)](https://omarhuseynov011.github.io/GraphicsExperiments/Windows/)
 * Test 14: [Edge Detection (Post-processing using kernels)](https://omarhuseynov011.github.io/GraphicsExperiments/PostProcess/)
 * Test 15: [Reflections (Environment Mapping)](https://omarhuseynov011.github.io/GraphicsExperiments/SkyBox/)
+* Test 16: [Refractions (Environment Mapping)](https://omarhuseynov011.github.io/GraphicsExperiments/SkyBox2/)
 
 Note: Press _CTRL + ENTER_ to apply the changes
