@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "command": "tsc",
     "isShellCommand": true,
-    "args": ["-p", "./SkyBox2"],
+    "args": ["-p", "./InstancedGrass"],
     "showOutput": "always",
     "problemMatcher": "$tsc"
 }
